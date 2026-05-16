@@ -4,33 +4,46 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+enum RestaurantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum SubscriptionType {
+  TRIAL
+  ANNUAL
 }
 
 model Restaurant {
-  id           String        @id @default(cuid())
-  name         String
-  slug         String        @unique
-  phone        String        @unique
-  passwordHash String
-  logoUrl      String?
-  createdAt    DateTime      @default(now())
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  email           String           @unique
+  passwordHash    String
+  logoUrl         String?
+  status          RestaurantStatus @default(PENDING)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime         @default(now())
 
   subscription  Subscription?
   categories    Category[]
   announcements Announcement[]
+  scans         MenuScan[]
 
   @@map("restaurants")
 }
 
 model Subscription {
-  id           String     @id @default(cuid())
-  restaurantId String     @unique
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  id           String           @id @default(cuid())
+  restaurantId String           @unique
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  type         SubscriptionType
   startsAt     DateTime
   endsAt       DateTime
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime         @default(now())
 
   @@map("subscriptions")
 }
@@ -43,7 +56,7 @@ model Category {
   order        Int        @default(0)
   createdAt    DateTime   @default(now())
 
-  products     Product[]
+  products Product[]
 
   @@map("categories")
 }
@@ -76,9 +89,10 @@ model Announcement {
 }
 
 model MenuScan {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   restaurantId String
-  scannedAt    DateTime @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  scannedAt    DateTime   @default(now())
 
   @@index([restaurantId])
   @@map("menu_scans")
