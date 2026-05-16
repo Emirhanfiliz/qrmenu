@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  phone        String        @unique
+  passwordHash String
+  logoUrl      String?
+  createdAt    DateTime      @default(now())
+
+  subscription  Subscription?
+  categories    Category[]
+  announcements Announcement[]
+
+  @@map("restaurants")
+}
+
+model Subscription {
+  id           String     @id @default(cuid())
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  startsAt     DateTime
+  endsAt       DateTime
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+
+  @@map("subscriptions")
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  products     Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("products")
+}
+
+model Announcement {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  title        String
+  body         String
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+
+  @@map("announcements")
+}
+
+model MenuScan {
+  id           String   @id @default(cuid())
+  restaurantId String
+  scannedAt    DateTime @default(now())
+
+  @@index([restaurantId])
+  @@map("menu_scans")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  @@map("admins")
+}
