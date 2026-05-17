@@ -51,6 +51,32 @@ export class AdminService {
     return { message: 'Restoran onaylandı ve abonelik atandı.' };
   }
 
+  async renewSubscription(restaurantId: string, type: SubscriptionType) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+      include: { subscription: true },
+    });
+    if (!restaurant) throw new NotFoundException('Restoran bulunamadı.');
+
+    const days = type === SubscriptionType.TRIAL ? 30 : 365;
+    const startsAt = new Date();
+    const endsAt = new Date();
+    endsAt.setDate(endsAt.getDate() + days);
+
+    if (restaurant.subscription) {
+      await this.prisma.subscription.update({
+        where: { restaurantId },
+        data: { type, startsAt, endsAt },
+      });
+    } else {
+      await this.prisma.subscription.create({
+        data: { restaurantId, type, startsAt, endsAt },
+      });
+    }
+
+    return { message: 'Abonelik yenilendi.' };
+  }
+
   async suspendRestaurant(restaurantId: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },

@@ -23,6 +23,11 @@ export class AdminController {
     return this.adminService.approveAndSubscribe(id, dto.type);
   }
 
+  @Patch('restaurants/:id/renew')
+  renew(@Param('id') id: string, @Body() dto: ApproveDto) {
+    return this.adminService.renewSubscription(id, dto.type);
+  }
+
   @Patch('restaurants/:id/suspend')
   suspend(@Param('id') id: string) {
     return this.adminService.suspendRestaurant(id);
