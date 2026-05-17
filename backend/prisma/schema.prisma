@@ -53,6 +53,7 @@ model Category {
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   name         String
+  imageUrl     String?
   order        Int        @default(0)
   createdAt    DateTime   @default(now())
 
