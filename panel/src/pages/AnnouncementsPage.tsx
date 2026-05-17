@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import ConfirmModal from '../components/ConfirmModal';
 import ImageUpload from '../components/ImageUpload';
 
 type Announcement = {
@@ -13,14 +14,22 @@ type Announcement = {
 
 export default function AnnouncementsPage() {
   const [items, setItems] = useState<Announcement[]>([]);
+  const [listLoading, setListLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [form, setForm] = useState({ title: '', body: '', imageUrl: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const load = () => api.get('/announcements').then(setItems).catch(() => {});
-  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    api.get('/announcements')
+      .then(setItems)
+      .catch(() => {})
+      .finally(() => setListLoading(false));
+  }, []);
 
   const openNew = () => {
     setEditing(null);
@@ -61,7 +70,6 @@ export default function AnnouncementsPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm('Duyuruyu silmek istediginize emin misiniz?')) return;
     await api.delete(`/announcements/${id}`).catch(() => {});
     load();
   };
@@ -124,9 +132,18 @@ export default function AnnouncementsPage() {
         </div>
       )}
 
-      {items.length === 0 ? (
+      {listLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="w-2 h-2 rounded-full bg-gold/50 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </div>
+        </div>
+      ) : items.length === 0 ? (
         <div className="border border-dashed border-border rounded-xl py-16 text-center">
           <p className="font-body text-silver">Henuz duyuru yok.</p>
+          <button onClick={openNew} className="mt-3 font-body text-gold text-sm hover:underline">İlk duyuruyu oluştur</button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -153,7 +170,7 @@ export default function AnnouncementsPage() {
                     <button onClick={() => openEdit(a)} className="px-3 py-1.5 text-xs font-body text-silver hover:text-snow border border-border hover:border-silver rounded-lg transition-colors">
                       Duzenle
                     </button>
-                    <button onClick={() => remove(a.id)} className="px-3 py-1.5 text-xs font-body text-red-400 border border-red-900/30 hover:border-red-400/30 rounded-lg transition-colors">
+                    <button onClick={() => setConfirmId(a.id)} className="px-3 py-1.5 text-xs font-body text-red-400 border border-red-900/30 hover:border-red-400/30 rounded-lg transition-colors">
                       Sil
                     </button>
                   </div>
@@ -162,6 +179,15 @@ export default function AnnouncementsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          message="Bu duyuru silinecek. Emin misiniz?"
+          confirmLabel="Evet, sil"
+          onConfirm={() => { remove(confirmId); setConfirmId(null); }}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );

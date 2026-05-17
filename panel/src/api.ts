@@ -7,7 +7,7 @@ function token() {
 }
 
 // Paths that should not trigger automatic toasts
-const SILENT_PATTERNS = ['/auth/', '/upload', 'reorder', 'change-password'];
+const SILENT_PATTERNS = ['/auth/', '/upload', 'reorder', 'change-password', '/restaurant/design', 'places-search'];
 const isSilent = (path: string) => SILENT_PATTERNS.some(p => path.includes(p));
 
 const SUCCESS_MSG: Record<string, string> = {

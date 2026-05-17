@@ -62,6 +62,13 @@ export class MenuService {
     return rest;
   }
 
+  async getOgData(slug: string) {
+    return this.prisma.restaurant.findUnique({
+      where: { slug },
+      select: { name: true, tagline: true, logoUrl: true, coverUrl: true },
+    });
+  }
+
   async recordScan(slug: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { slug },

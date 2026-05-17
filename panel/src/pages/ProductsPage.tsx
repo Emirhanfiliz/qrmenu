@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
+import ConfirmModal from '../components/ConfirmModal';
 import ImageUpload from '../components/ImageUpload';
 
 type Category = { id: string; name: string };
@@ -49,6 +50,7 @@ export default function ProductsPage() {
   const [listError, setListError] = useState('');
   const [dragging, setDragging] = useState<string | null>(null);
   const dragOver = useRef<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const load = () => {
     api.get('/products').then(setProducts).catch(() => {});
@@ -125,7 +127,6 @@ export default function ProductsPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm('Ürünü silmek istediğinize emin misiniz?')) return;
     try {
       await api.delete(`/products/${id}`);
       load();
@@ -360,11 +361,20 @@ export default function ProductsPage() {
                   {p.isAvailable ? 'Pasifle' : 'Aktifle'}
                 </button>
                 <button onClick={() => openEdit(p)} className="px-3 py-1.5 text-xs font-body text-silver hover:text-snow border border-border hover:border-silver rounded-lg transition-colors">Duzenle</button>
-                <button onClick={() => remove(p.id)} className="px-3 py-1.5 text-xs font-body text-red-400 hover:text-red-300 border border-red-900/30 hover:border-red-400/30 rounded-lg transition-colors">Sil</button>
+                <button onClick={() => setConfirmId(p.id)} className="px-3 py-1.5 text-xs font-body text-red-400 hover:text-red-300 border border-red-900/30 hover:border-red-400/30 rounded-lg transition-colors">Sil</button>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {confirmId && (
+        <ConfirmModal
+          message="Bu ürün silinecek. Emin misiniz?"
+          confirmLabel="Evet, sil"
+          onConfirm={() => { remove(confirmId); setConfirmId(null); }}
+          onCancel={() => setConfirmId(null)}
+        />
       )}
     </div>
   );

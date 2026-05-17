@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from '../lib/toast';
 
 const MENU_BASE = import.meta.env.VITE_MENU_BASE || 'http://localhost:5173';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 export default function QrCodePage() {
   const { restaurant } = useAuth();
@@ -13,6 +14,7 @@ export default function QrCodePage() {
   if (!restaurant) return null;
 
   const menuUrl = `${MENU_BASE}/${restaurant.slug}`;
+  const shareUrl = `${API_BASE}/menu/${restaurant.slug}/og`;
 
   const downloadSvg = () => {
     const qrEl = svgRef.current?.querySelector('svg');
@@ -132,11 +134,21 @@ export default function QrCodePage() {
         </div>
       </div>
 
-      <div className="mt-4 px-5 py-4 bg-surface border border-border rounded-xl">
-        <p className="font-body text-xs text-silver leading-relaxed">
-          QR kodu menunuze baglidir. Slug:{' '}
-          <span className="text-gold font-medium">{restaurant.slug}</span>
+      {/* Social share URL */}
+      <div className="mt-4 bg-surface border border-border rounded-2xl p-6">
+        <p className="font-body text-xs text-silver uppercase tracking-widest mb-3">Sosyal Medya Paylaşım Linki</p>
+        <p className="font-body text-xs text-silver/60 mb-3 leading-relaxed">
+          Bu linki WhatsApp, Telegram veya sosyal medyada paylaşın — önizleme olarak restoran adı ve görseli çıkar.
         </p>
+        <div className="bg-elevated border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3">
+          <p className="font-body text-silver text-xs truncate">{shareUrl}</p>
+          <button
+            onClick={() => { navigator.clipboard.writeText(shareUrl); toast('Link kopyalandı.', 'info'); }}
+            className="font-body text-xs text-gold hover:text-gold-dim flex-shrink-0 transition-colors"
+          >
+            Kopyala
+          </button>
+        </div>
       </div>
 
       {/* Menu preview modal */}
