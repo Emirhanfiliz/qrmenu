@@ -170,7 +170,7 @@ export default function ProductsPage() {
   const filtered = filterCat ? products.filter((p) => p.category.id === filterCat) : products;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-2xl text-snow font-semibold">Urunler</h1>

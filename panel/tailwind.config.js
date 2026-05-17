@@ -4,18 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        void: '#0a0a0a',
-        surface: '#141414',
-        elevated: '#1f1f1f',
-        border: '#2a2a2a',
-        gold: '#f0a500',
-        'gold-dim': '#c4880a',
-        silver: '#a0a0a0',
-        snow: '#f0f0f0',
+        void:       '#f3f4f6',   // ana arka plan (çok açık gri)
+        surface:    '#ffffff',   // kart / header
+        elevated:   '#f9fafb',   // hover, input bg
+        border:     '#e5e7eb',   // border
+        gold:       '#6366f1',   // indigo primary
+        'gold-dim': '#4f46e5',   // indigo hover
+        silver:     '#6b7280',   // muted text
+        snow:       '#111827',   // ana metin
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        body: ['"DM Sans"', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        body:    ['"Plus Jakarta Sans"', 'sans-serif'],
       },
     },
   },

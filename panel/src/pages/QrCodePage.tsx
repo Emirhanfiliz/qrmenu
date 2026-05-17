@@ -86,7 +86,7 @@ export default function QrCodePage() {
   };
 
   return (
-    <div className="max-w-md">
+    <div className="max-w-md mx-auto">
       <div className="mb-8">
         <h1 className="font-display text-2xl text-snow font-semibold">QR Kodunuz</h1>
         <p className="font-body text-silver text-sm mt-1">

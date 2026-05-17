@@ -37,7 +37,7 @@ export default function AccountPage() {
   const inputCls = 'w-full bg-elevated border border-border rounded-lg px-4 py-2.5 font-body text-snow text-sm focus:outline-none focus:border-gold/50 transition-colors';
 
   return (
-    <div className="max-w-md">
+    <div className="max-w-md mx-auto">
       <div className="mb-8">
         <h1 className="font-display text-2xl text-snow font-semibold">Hesap</h1>
         <p className="font-body text-silver text-sm mt-1">Sifrenizi buradan degistirebilirsiniz.</p>
