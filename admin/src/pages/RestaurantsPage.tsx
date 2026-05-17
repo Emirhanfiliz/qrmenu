@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 type Restaurant = {
   id: string;
@@ -36,6 +37,8 @@ export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filter, setFilter] = useState<typeof STATUS_FILTER[number]>('ALL');
   const [acting, setActing] = useState<string | null>(null);
+  const [confirmSuspend, setConfirmSuspend] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const load = (status?: string) => {
     const path = status && status !== 'ALL' ? `/admin/restaurants?status=${status}` : '/admin/restaurants';
@@ -51,7 +54,7 @@ export default function RestaurantsPage() {
     try {
       await api.patch(`/admin/restaurants/${id}/approve`, { type });
       load(filter);
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { setErrorMsg(err.message); }
     finally { setActing(null); }
   };
 
@@ -60,17 +63,16 @@ export default function RestaurantsPage() {
     try {
       await api.patch(`/admin/restaurants/${id}/renew`, { type });
       load(filter);
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { setErrorMsg(err.message); }
     finally { setActing(null); }
   };
 
   const suspend = async (id: string) => {
-    if (!confirm('Restorani askiya almak istediginize emin misiniz?')) return;
     setActing(id);
     try {
       await api.patch(`/admin/restaurants/${id}/suspend`, {});
       load(filter);
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) { setErrorMsg(err.message); }
     finally { setActing(null); }
   };
 
@@ -252,7 +254,7 @@ export default function RestaurantsPage() {
                           +365g
                         </button>
                         <button
-                          onClick={() => suspend(r.id)}
+                          onClick={() => setConfirmSuspend(r.id)}
                           disabled={acting === r.id}
                           className="px-2 py-1 text-xs font-mono text-danger border border-danger/20 hover:bg-danger/10 rounded transition-colors disabled:opacity-40"
                         >
@@ -267,6 +269,25 @@ export default function RestaurantsPage() {
           </div>
         )}
       </div>
+
+      {confirmSuspend && (
+        <ConfirmModal
+          message="Restoranı askıya almak istediğinize emin misiniz? Müşteriler menüye erişemez."
+          confirmLabel="evet, askıya al"
+          onConfirm={() => { suspend(confirmSuspend); setConfirmSuspend(null); }}
+          onCancel={() => setConfirmSuspend(null)}
+        />
+      )}
+
+      {errorMsg && (
+        <ConfirmModal
+          message={errorMsg}
+          confirmLabel="tamam"
+          danger={false}
+          onConfirm={() => setErrorMsg(null)}
+          onCancel={() => setErrorMsg(null)}
+        />
+      )}
     </div>
   );
 }
