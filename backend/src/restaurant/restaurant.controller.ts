@@ -9,6 +9,7 @@ class UpdateRestaurantDto {
 }
 
 class UpdateDesignDto {
+  @IsOptional() @IsString() logoUrl?: string;
   @IsOptional() @IsIn(['beach', 'new21']) theme?: string;
   @IsOptional() @IsString() tagline?: string;
   @IsOptional() @IsString() coverUrl?: string;

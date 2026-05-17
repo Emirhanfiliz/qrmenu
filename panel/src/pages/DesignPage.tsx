@@ -6,6 +6,7 @@ import ImageUpload from '../components/ImageUpload';
 const MENU_BASE = import.meta.env.VITE_MENU_BASE || 'http://localhost:5173';
 
 type Design = {
+  logoUrl: string;
   theme: string;
   tagline: string;
   coverUrl: string;
@@ -40,6 +41,7 @@ const THEMES = [
 export default function DesignPage() {
   const { restaurant } = useAuth();
   const [design, setDesign] = useState<Design>({
+    logoUrl: '',
     theme: 'beach',
     tagline: '',
     coverUrl: '',
@@ -64,6 +66,7 @@ export default function DesignPage() {
   useEffect(() => {
     api.get('/restaurant/design').then((data: Design) => {
       setDesign({
+        logoUrl: data.logoUrl ?? '',
         theme: data.theme ?? 'beach',
         tagline: data.tagline ?? '',
         coverUrl: data.coverUrl ?? '',
@@ -217,16 +220,59 @@ export default function DesignPage() {
         )}
       </div>
 
-      {/* Info + images */}
+      {/* Görseller */}
+      <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
+        <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Görseller</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Logo */}
+          <div className="flex flex-col gap-3">
+            <ImageUpload
+              label="Logo"
+              value={design.logoUrl}
+              onChange={(url) => setDesign({ ...design, logoUrl: url })}
+            />
+            {design.logoUrl && (
+              <div className="flex justify-center">
+                <img
+                  src={design.logoUrl}
+                  alt="Logo önizleme"
+                  className="w-20 h-20 object-contain rounded-xl bg-elevated border border-border p-2"
+                />
+              </div>
+            )}
+            <p className="font-body text-xs text-silver/50 text-center">
+              Temada karşılama ekranı ve sidebar'da görünür
+            </p>
+          </div>
+
+          {/* Banner / Cover */}
+          <div className="flex flex-col gap-3">
+            <ImageUpload
+              label="Banner (Hero Arkaplan)"
+              value={design.coverUrl}
+              onChange={(url) => setDesign({ ...design, coverUrl: url })}
+            />
+            {design.coverUrl && (
+              <div className="flex justify-center">
+                <img
+                  src={design.coverUrl}
+                  alt="Banner önizleme"
+                  className="w-full h-20 object-cover rounded-xl border border-border"
+                />
+              </div>
+            )}
+            <p className="font-body text-xs text-silver/50 text-center">
+              Menü açılış hero bölümünün arkaplanı
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Restoran bilgileri */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
         <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Restoran Bilgileri</p>
         <div className="flex flex-col gap-4">
           {field('Slogan', 'tagline', 'Lezzetin yeni adresi')}
-          <ImageUpload
-            label="Kapak Fotografi (hero arkaplan)"
-            value={design.coverUrl}
-            onChange={(url) => setDesign({ ...design, coverUrl: url })}
-          />
           {field('Adres', 'address', 'Ornek Cad. No:1, Istanbul')}
           {field('Telefon', 'phone', '0212 999 88 77')}
           {field('Calisma Saatleri', 'workingHours', '09:00 - 23:00')}

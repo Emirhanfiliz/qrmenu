@@ -43,6 +43,7 @@ export class RestaurantService {
     return this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
       select: {
+        logoUrl: true,
         theme: true,
         tagline: true,
         coverUrl: true,
@@ -62,6 +63,7 @@ export class RestaurantService {
   async updateDesign(
     restaurantId: string,
     dto: {
+      logoUrl?: string;
       theme?: string;
       tagline?: string;
       coverUrl?: string;
@@ -80,6 +82,7 @@ export class RestaurantService {
       where: { id: restaurantId },
       data: dto,
       select: {
+        logoUrl: true,
         theme: true,
         tagline: true,
         coverUrl: true,
