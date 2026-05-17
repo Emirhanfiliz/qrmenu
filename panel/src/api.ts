@@ -1,4 +1,4 @@
-const BASE = 'http://localhost:3001';
+const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 function token() {
   return localStorage.getItem('token');
@@ -16,6 +16,19 @@ async function req(method: string, path: string, body?: unknown) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Bir hata oluştu.');
   return data;
+}
+
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${BASE}/upload`, {
+    method: 'POST',
+    headers: token() ? { Authorization: `Bearer ${token()}` } : {},
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Upload başarısız.');
+  return data.url as string;
 }
 
 export const api = {

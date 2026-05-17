@@ -7,6 +7,7 @@ import { MenuModule } from './menu/menu.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductModule } from './product/product.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RestaurantModule } from './restaurant/restaurant.module';
     ProductModule,
     AnnouncementModule,
     MenuModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

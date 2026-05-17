@@ -7,7 +7,9 @@ const nav = [
   { to: '/categories', label: 'Kategoriler' },
   { to: '/products', label: 'Urunler' },
   { to: '/announcements', label: 'Duyurular' },
+  { to: '/design', label: 'Tasarim' },
   { to: '/qr-code', label: 'QR Kod' },
+  { to: '/account', label: 'Hesap' },
 ];
 
 export default function Layout() {

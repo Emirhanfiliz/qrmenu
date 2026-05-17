@@ -12,6 +12,14 @@ export class MenuService {
         id: true,
         name: true,
         logoUrl: true,
+        theme: true,
+        tagline: true,
+        coverUrl: true,
+        address: true,
+        phone: true,
+        workingHours: true,
+        wifiInfo: true,
+        showWelcome: true,
         status: true,
         subscription: { select: { endsAt: true } },
         categories: {
@@ -24,13 +32,7 @@ export class MenuService {
             products: {
               where: { isAvailable: true },
               orderBy: { order: 'asc' },
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                price: true,
-                imageUrl: true,
-              },
+              select: { id: true, name: true, description: true, price: true, imageUrl: true },
             },
           },
         },
@@ -44,10 +46,7 @@ export class MenuService {
 
     if (!restaurant) throw new NotFoundException('Menü bulunamadı.');
 
-    const subActive =
-      restaurant.subscription &&
-      new Date(restaurant.subscription.endsAt) > new Date();
-
+    const subActive = restaurant.subscription && new Date(restaurant.subscription.endsAt) > new Date();
     if (!subActive) throw new NotFoundException('Menü bulunamadı.');
 
     await this.prisma.menuScan.create({ data: { restaurantId: restaurant.id } });

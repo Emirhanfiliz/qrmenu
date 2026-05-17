@@ -24,6 +24,18 @@ export class CategoryService {
     return this.prisma.category.update({ where: { id }, data: dto });
   }
 
+  async reorder(restaurantId: string, ids: string[]) {
+    await Promise.all(
+      ids.map((id, index) =>
+        this.prisma.category.updateMany({
+          where: { id, restaurantId },
+          data: { order: index },
+        }),
+      ),
+    );
+    return { message: 'Sıralama güncellendi.' };
+  }
+
   async remove(restaurantId: string, id: string) {
     await this.assertOwner(restaurantId, id);
     await this.prisma.category.delete({ where: { id } });

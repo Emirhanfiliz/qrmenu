@@ -24,6 +24,14 @@ model Restaurant {
   email           String           @unique
   passwordHash    String
   logoUrl         String?
+  theme           String           @default("beach")
+  tagline         String?
+  coverUrl        String?
+  address         String?
+  phone           String?
+  workingHours    String?
+  wifiInfo        String?
+  showWelcome     Boolean          @default(false)
   status          RestaurantStatus @default(PENDING)
   emailVerifiedAt DateTime?
   createdAt       DateTime         @default(now())

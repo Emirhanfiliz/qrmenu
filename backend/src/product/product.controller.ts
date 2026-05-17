@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { ProductService } from './product.service';
 
@@ -9,7 +9,7 @@ class CreateProductDto {
   @IsString() name: string;
   @IsOptional() @IsString() description?: string;
   @IsNumber() @Min(0) @Type(() => Number) price: number;
-  @IsOptional() @IsUrl() imageUrl?: string;
+  @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsBoolean() isAvailable?: boolean;
 }
 
@@ -18,9 +18,13 @@ class UpdateProductDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsNumber() @Min(0) @Type(() => Number) price?: number;
-  @IsOptional() @IsUrl() imageUrl?: string;
+  @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsBoolean() isAvailable?: boolean;
   @IsOptional() @IsInt() @Min(0) order?: number;
+}
+
+class ReorderDto {
+  @IsArray() @IsString({ each: true }) ids: string[];
 }
 
 @UseGuards(ActiveRestaurantGuard)
@@ -36,6 +40,11 @@ export class ProductController {
   @Post()
   create(@Req() req: any, @Body() dto: CreateProductDto) {
     return this.productService.create(req.user.id, dto);
+  }
+
+  @Post('reorder')
+  reorder(@Req() req: any, @Body() dto: ReorderDto) {
+    return this.productService.reorder(req.user.id, dto.ids);
   }
 
   @Patch(':id')

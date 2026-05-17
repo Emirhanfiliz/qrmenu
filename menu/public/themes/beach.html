@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sand: #f5ede0;
+      --sand-dark: #e8ddd0;
+      --teal: #0db5af;
+      --teal-dark: #0a9994;
+      --deep: #1a3535;
+      --card: #ffffff;
+      --text: #2a2a2a;
+      --muted: #7a7a7a;
+      --radius: 18px;
+      --sheet-radius: 28px;
+    }
+
+    html, body { height: 100%; overflow-x: hidden; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--sand);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 280px;
+      height: 100%;
+      background: var(--deep);
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 40px;
+      overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .sb-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sb-head h3 {
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .close-x {
+      color: rgba(255,255,255,0.4);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color .2s;
+    }
+    .close-x:hover { color: #fff; }
+
+    .info {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .info h4 {
+      color: rgba(255,255,255,0.35);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .info h4 i { color: var(--teal); font-size: 11px; }
+    .info p {
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .socials { display: flex; gap: 14px; margin-top: 4px; }
+    .socials i {
+      color: rgba(255,255,255,0.5);
+      font-size: 20px;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .socials i:hover { color: var(--teal); }
+
+    .sb-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 199;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s;
+    }
+    .sb-overlay.show { opacity: 1; pointer-events: all; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      height: 300px;
+      background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
+                  url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 24px;
+      overflow: hidden;
+    }
+
+    .hero-bg-palm {
+      position: absolute;
+      bottom: -10px;
+      right: -20px;
+      font-size: 180px;
+      color: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+
+    .hero-controls {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+    }
+
+    .nav-btn {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 16px;
+      transition: background .2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .hero h1 {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+    .hero p {
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      font-weight: 400;
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── LOGO (optional) ── */
+    .hero-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.8);
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── ANNOUNCEMENTS ── */
+    .announcements {
+      padding: 12px 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .announcement-chip {
+      background: var(--teal);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+    .announcement-chip strong { display: block; font-weight: 600; margin-bottom: 2px; font-size: 12px; }
+    .announcement-chip span { font-size: 12px; opacity: .9; }
+
+    /* ── CATEGORY NAV ── */
+    .cats {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 16px 12px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      background: var(--sand);
+      z-index: 10;
+      border-bottom: 1px solid var(--sand-dark);
+    }
+    .cats::-webkit-scrollbar { display: none; }
+
+    .chip {
+      flex-shrink: 0;
+      padding: 8px 18px;
+      border-radius: 50px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid var(--sand-dark);
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .chip.active {
+      background: var(--teal);
+      color: #fff;
+      border-color: var(--teal);
+      box-shadow: 0 4px 12px rgba(13,181,175,0.3);
+    }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 14px 14px 100px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform .2s, box-shadow .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card:active { transform: scale(0.97); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    .card img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      display: block;
+      background: var(--sand-dark);
+    }
+    .card-body { padding: 11px 12px 13px; }
+    .card-body h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-top: 6px;
+    }
+
+    /* ── BOTTOM SHEET ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+      display: flex;
+      align-items: flex-end;
+    }
+    .overlay.show { opacity: 1; pointer-events: all; }
+
+    .sheet {
+      width: 100%;
+      background: #fff;
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .sheet::-webkit-scrollbar { display: none; }
+    .overlay.show .sheet { transform: translateY(0); }
+
+    .handle {
+      width: 40px; height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin: 14px auto 0;
+    }
+
+    .sheet-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      margin-top: 16px;
+      background: var(--sand-dark);
+    }
+
+    .sheet-content { padding: 20px 20px 30px; }
+    .sheet-content h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .p-price {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-top: 6px;
+    }
+    .p-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .detail {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      display: block;
+      margin-bottom: 5px;
+    }
+    .detail p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .back-btn {
+      display: block;
+      width: calc(100% - 40px);
+      margin: 0 20px 32px;
+      padding: 16px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .back-btn:hover { background: var(--teal-dark); }
+
+    /* ── LANG SWITCHER ── */
+    .lang-switcher { position: relative; }
+    .lang-btn {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lang-list {
+      display: none;
+      position: absolute;
+      top: 46px; left: 0;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      min-width: 60px;
+    }
+    .lang-list.open { display: block; }
+    .lang-item {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text);
+      transition: background .15s;
+    }
+    .lang-item:hover { background: var(--sand); }
+    .lang-item.selected { color: var(--teal); font-weight: 600; }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar overlay -->
+  <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sb">
+    <div class="sb-head">
+      <h3>REHBER</h3>
+      <span class="close-x" onclick="closeSb()">×</span>
+    </div>
+    <div class="info">
+      <h4><i class="fas fa-clock"></i> SAATLER</h4>
+      <p id="sb-hours">-</p>
+    </div>
+    <div class="info">
+      <h4><i class="fas fa-map-marker-alt"></i> ADRES</h4>
+      <p id="sb-address">-</p>
+    </div>
+    <div class="info">
+      <h4><i class="fas fa-phone"></i> TELEFON</h4>
+      <p id="sb-phone">-</p>
+    </div>
+    <div class="info">
+      <h4><i class="fas fa-wifi"></i> WI-FI</h4>
+      <p id="sb-wifi">-</p>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero" id="heroSec">
+    <i class="fas fa-umbrella-beach hero-bg-palm"></i>
+    <div class="hero-controls">
+      <div class="lang-switcher" id="langSwitcher">
+        <button class="lang-btn" onclick="toggleLang()">
+          <i class="fas fa-globe"></i>
+        </button>
+        <div class="lang-list" id="langList">
+          <div class="lang-item selected">TR</div>
+          <div class="lang-item">EN</div>
+        </div>
+      </div>
+      <div class="nav-btn" onclick="openSb()">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+    <h1 id="heroTitle">Menü</h1>
+    <p id="heroDesc"></p>
+  </section>
+
+  <!-- Announcements -->
+  <div class="announcements" id="announcements"></div>
+
+  <!-- Category nav -->
+  <nav class="cats" id="cats"></nav>
+
+  <!-- Product grid -->
+  <main class="grid" id="grid"></main>
+
+  <!-- Product detail bottom sheet -->
+  <div class="overlay" id="ov" onclick="closeSheet()">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="handle"></div>
+      <img class="sheet-img" id="sImg" src="" alt="" />
+      <div class="sheet-content">
+        <h2 id="sName"></h2>
+        <p class="p-price" id="sPrice"></p>
+        <p class="p-desc" id="sDesc"></p>
+        <div class="detail" id="sIngArea" style="display:none">
+          <span class="lbl">İçerik</span>
+          <p id="sIng"></p>
+        </div>
+        <div class="detail" id="sAlgArea" style="display:none">
+          <span class="lbl">Alerjen</span>
+          <p id="sAlg"></p>
+        </div>
+      </div>
+      <button class="back-btn" onclick="closeSheet()">KAPAT</button>
+    </div>
+  </div>
+
+  <script>
+    function openSb() {
+      document.getElementById('sb').classList.add('open');
+      document.getElementById('sbOverlay').classList.add('show');
+    }
+    function closeSb() {
+      document.getElementById('sb').classList.remove('open');
+      document.getElementById('sbOverlay').classList.remove('show');
+    }
+    function toggleLang() {
+      document.getElementById('langList').classList.toggle('open');
+    }
+    function closeSheet() {
+      document.getElementById('ov').classList.remove('show');
+    }
+
+    function renderItems(items) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      if (!items || items.length === 0) {
+        grid.innerHTML = '<div class="empty">Bu kategoride ürün bulunmuyor.</div>';
+        return;
+      }
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.onclick = () => showItem(item);
+        div.innerHTML = `
+          <img
+            src="${item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'}"
+            alt="${item.name}"
+            loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'"
+          />
+          <div class="card-body">
+            <h3>${item.name}</h3>
+            <div class="price">${item.price} TL</div>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function showItem(item) {
+      const fallback = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80';
+      document.getElementById('sImg').src = item.image || fallback;
+      document.getElementById('sImg').onerror = function() { this.src = fallback; };
+      document.getElementById('sName').textContent = item.name;
+      document.getElementById('sPrice').textContent = item.price + ' TL';
+      document.getElementById('sDesc').textContent = item.desc || '';
+
+      const ingArea = document.getElementById('sIngArea');
+      const algArea = document.getElementById('sAlgArea');
+
+      if (item.ing) {
+        document.getElementById('sIng').textContent = item.ing;
+        ingArea.style.display = 'block';
+      } else { ingArea.style.display = 'none'; }
+
+      if (item.alg) {
+        document.getElementById('sAlg').textContent = item.alg;
+        algArea.style.display = 'block';
+      } else { algArea.style.display = 'none'; }
+
+      document.getElementById('ov').classList.add('show');
+    }
+
+    // Called by parent (MenuPage.tsx) after iframe loads
+    window.render = function(data) {
+      if (!data) return;
+
+      // Restaurant name & hero
+      if (data.name) {
+        document.getElementById('heroTitle').textContent = data.name;
+        document.title = data.name;
+      }
+
+      // Hero background image (logo as fallback)
+      if (data.heroImage) {
+        document.getElementById('heroSec').style.backgroundImage =
+          `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)), url('${data.heroImage}')`;
+      }
+
+      // Sidebar info
+      if (data.info) {
+        document.getElementById('sb-hours').textContent = data.info.hours || '-';
+        document.getElementById('sb-address').textContent = data.info.address || '-';
+        document.getElementById('sb-phone').textContent = data.info.phone || '-';
+        document.getElementById('sb-wifi').textContent = data.info.wifi || '-';
+      }
+
+      // Announcements
+      const annEl = document.getElementById('announcements');
+      annEl.innerHTML = '';
+      if (data.announcements && data.announcements.length > 0) {
+        data.announcements.forEach(a => {
+          const div = document.createElement('div');
+          div.className = 'announcement-chip';
+          div.innerHTML = `<strong>${a.title}</strong><span>${a.body}</span>`;
+          annEl.appendChild(div);
+        });
+      }
+
+      // Categories & items
+      const cats = document.getElementById('cats');
+      cats.innerHTML = '';
+      if (!data.menu || data.menu.length === 0) return;
+
+      data.menu.forEach((cat, i) => {
+        const btn = document.createElement('div');
+        btn.className = `chip${i === 0 ? ' active' : ''}`;
+        btn.textContent = cat.cat;
+        btn.onclick = () => {
+          document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          renderItems(cat.items);
+        };
+        cats.appendChild(btn);
+      });
+
+      renderItems(data.menu[0].items);
+    };
+  </script>
+</body>
+</html>

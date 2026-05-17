@@ -1,8 +1,8 @@
 import { useRef } from 'react';
-import { QRCodeSVG } from 'react-qr-code';
+import { QRCode as QRCodeSVG } from 'react-qr-code';
 import { useAuth } from '../context/AuthContext';
 
-const MENU_BASE = 'http://localhost:5173';
+const MENU_BASE = import.meta.env.VITE_MENU_BASE || 'http://localhost:5173';
 
 export default function QrCodePage() {
   const { restaurant } = useAuth();

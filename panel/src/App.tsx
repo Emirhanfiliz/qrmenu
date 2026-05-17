@@ -1,9 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import AccountPage from './pages/AccountPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import CategoriesPage from './pages/CategoriesPage';
 import DashboardPage from './pages/DashboardPage';
+import DesignPage from './pages/DesignPage';
 import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import QrCodePage from './pages/QrCodePage';
@@ -37,6 +39,8 @@ export default function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/qr-code" element={<QrCodePage />} />
+            <Route path="/design" element={<DesignPage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

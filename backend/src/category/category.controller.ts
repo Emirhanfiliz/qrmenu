@@ -1,17 +1,21 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { IsInt, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import { IsArray, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { CategoryService } from './category.service';
 
 class CreateCategoryDto {
   @IsString() name: string;
-  @IsOptional() @IsUrl() imageUrl?: string;
+  @IsOptional() @IsString() imageUrl?: string;
 }
 
 class UpdateCategoryDto {
   @IsOptional() @IsString() name?: string;
-  @IsOptional() @IsUrl() imageUrl?: string;
+  @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsInt() @Min(0) order?: number;
+}
+
+class ReorderDto {
+  @IsArray() @IsString({ each: true }) ids: string[];
 }
 
 @UseGuards(ActiveRestaurantGuard)
@@ -27,6 +31,11 @@ export class CategoryController {
   @Post()
   create(@Req() req: any, @Body() dto: CreateCategoryDto) {
     return this.categoryService.create(req.user.id, dto);
+  }
+
+  @Post('reorder')
+  reorder(@Req() req: any, @Body() dto: ReorderDto) {
+    return this.categoryService.reorder(req.user.id, dto.ids);
   }
 
   @Patch(':id')

@@ -1,11 +1,27 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
-import { IsOptional, IsString, IsUrl } from 'class-validator';
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { RestaurantService } from './restaurant.service';
 
 class UpdateRestaurantDto {
   @IsOptional() @IsString() name?: string;
-  @IsOptional() @IsUrl() logoUrl?: string;
+  @IsOptional() @IsString() logoUrl?: string;
+}
+
+class UpdateDesignDto {
+  @IsOptional() @IsString() theme?: string;
+  @IsOptional() @IsString() tagline?: string;
+  @IsOptional() @IsString() coverUrl?: string;
+  @IsOptional() @IsString() address?: string;
+  @IsOptional() @IsString() phone?: string;
+  @IsOptional() @IsString() workingHours?: string;
+  @IsOptional() @IsString() wifiInfo?: string;
+  @IsOptional() @IsBoolean() showWelcome?: boolean;
+}
+
+class ChangePasswordDto {
+  @IsString() currentPassword: string;
+  @IsString() newPassword: string;
 }
 
 @UseGuards(ActiveRestaurantGuard)
@@ -21,6 +37,21 @@ export class RestaurantController {
   @Patch('me')
   updateMe(@Req() req: any, @Body() dto: UpdateRestaurantDto) {
     return this.restaurantService.updateMe(req.user.id, dto);
+  }
+
+  @Post('change-password')
+  changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    return this.restaurantService.changePassword(req.user.id, dto);
+  }
+
+  @Get('design')
+  getDesign(@Req() req: any) {
+    return this.restaurantService.getDesign(req.user.id);
+  }
+
+  @Patch('design')
+  updateDesign(@Req() req: any, @Body() dto: UpdateDesignDto) {
+    return this.restaurantService.updateDesign(req.user.id, dto);
   }
 
   @Get('stats')
