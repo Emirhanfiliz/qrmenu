@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { RestaurantService } from './restaurant.service';
 
@@ -9,7 +9,7 @@ class UpdateRestaurantDto {
 }
 
 class UpdateDesignDto {
-  @IsOptional() @IsString() theme?: string;
+  @IsOptional() @IsIn(['beach', 'new21']) theme?: string;
   @IsOptional() @IsString() tagline?: string;
   @IsOptional() @IsString() coverUrl?: string;
   @IsOptional() @IsString() address?: string;
@@ -21,7 +21,7 @@ class UpdateDesignDto {
 
 class ChangePasswordDto {
   @IsString() currentPassword: string;
-  @IsString() newPassword: string;
+  @IsString() @MinLength(6) newPassword: string;
 }
 
 @UseGuards(ActiveRestaurantGuard)

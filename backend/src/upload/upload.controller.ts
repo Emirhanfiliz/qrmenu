@@ -27,9 +27,10 @@ export class UploadController {
       }),
       limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
       fileFilter: (_, file, cb) => {
-        const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const allowedExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         const ext = path.extname(file.originalname).toLowerCase();
-        if (allowed.includes(ext)) {
+        if (allowedExt.includes(ext) && allowedMime.includes(file.mimetype)) {
           cb(null, true);
         } else {
           cb(new BadRequestException('Sadece resim dosyaları yüklenebilir.'), false);

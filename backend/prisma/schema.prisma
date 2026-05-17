@@ -67,6 +67,7 @@ model Category {
 
   products Product[]
 
+  @@index([restaurantId])
   @@map("categories")
 }
 
@@ -82,6 +83,7 @@ model Product {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -94,6 +96,7 @@ model Announcement {
   isActive     Boolean    @default(true)
   createdAt    DateTime   @default(now())
 
+  @@index([restaurantId])
   @@map("announcements")
 }
 
@@ -103,7 +106,7 @@ model MenuScan {
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   scannedAt    DateTime   @default(now())
 
-  @@index([restaurantId])
+  @@index([restaurantId, scannedAt])
   @@map("menu_scans")
 }
 
