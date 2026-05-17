@@ -110,16 +110,35 @@ export class RestaurantService {
   }
 
   async getStats(restaurantId: string) {
-    const [totalScans, categoryCount, productCount] = await Promise.all([
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
+    last30Days.setHours(0, 0, 0, 0);
+
+    const [totalScans, categoryCount, productCount, recentScans, dailyRaw] = await Promise.all([
       this.prisma.menuScan.count({ where: { restaurantId } }),
       this.prisma.category.count({ where: { restaurantId } }),
       this.prisma.product.count({ where: { category: { restaurantId } } }),
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: last30Days } } }),
+      this.prisma.$queryRaw<{ date: string; count: bigint }[]>`
+        SELECT TO_CHAR(DATE("scannedAt"), 'YYYY-MM-DD') as date, COUNT(*)::bigint as count
+        FROM menu_scans
+        WHERE "restaurantId" = ${restaurantId}
+          AND "scannedAt" >= ${last30Days}
+        GROUP BY DATE("scannedAt")
+        ORDER BY DATE("scannedAt")
+      `,
     ]);
-    const last30Days = new Date();
-    last30Days.setDate(last30Days.getDate() - 30);
-    const recentScans = await this.prisma.menuScan.count({
-      where: { restaurantId, scannedAt: { gte: last30Days } },
-    });
-    return { totalScans, recentScans, categoryCount, productCount };
+
+    // Fill in zero-count days for the last 30 days
+    const countMap = new Map(dailyRaw.map((r) => [r.date, Number(r.count)]));
+    const dailyScans: { date: string; count: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      dailyScans.push({ date: key, count: countMap.get(key) ?? 0 });
+    }
+
+    return { totalScans, recentScans, categoryCount, productCount, dailyScans };
   }
 }
