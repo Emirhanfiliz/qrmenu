@@ -21,9 +21,12 @@ export default function DashboardPage() {
   const subEnds = restaurant?.subscription
     ? new Date(restaurant.subscription.endsAt)
     : null;
+  const now = Date.now();
+  const subExpired = subEnds ? subEnds.getTime() < now : false;
   const daysLeft = subEnds
-    ? Math.max(0, Math.ceil((subEnds.getTime() - Date.now()) / 86400000))
+    ? Math.max(0, Math.ceil((subEnds.getTime() - now) / 86400000))
     : 0;
+  const expiringSoon = !subExpired && daysLeft <= 7 && daysLeft > 0;
 
   return (
     <div className="max-w-3xl">
@@ -45,18 +48,50 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Subscription */}
+      {/* Subscription expired banner */}
+      {isActive && subExpired && (
+        <div className="mb-6 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+          <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="font-body text-red-400 text-sm">
+            Aboneliginiz sona erdi. Musterileriniz menunuze erisemiyor. Yenilemek icin bizimle iletisime gecin.
+          </p>
+        </div>
+      )}
+
+      {/* Expiring soon banner */}
+      {isActive && expiringSoon && (
+        <div className="mb-6 px-5 py-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center gap-3">
+          <svg className="w-5 h-5 text-orange-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+          </svg>
+          <p className="font-body text-orange-400 text-sm">
+            Aboneliginiz <span className="font-semibold">{daysLeft} gun</span> sonra sona eriyor. Kesintisiz hizmet icin yenileyin.
+          </p>
+        </div>
+      )}
+
+      {/* Subscription card */}
       {isActive && restaurant?.subscription && (
-        <div className="mb-6 px-5 py-4 bg-gold/6 border border-gold/15 rounded-xl flex items-center justify-between">
+        <div className={`mb-6 px-5 py-4 rounded-xl flex items-center justify-between border ${
+          subExpired
+            ? 'bg-red-500/6 border-red-500/15'
+            : expiringSoon
+            ? 'bg-orange-500/6 border-orange-500/15'
+            : 'bg-gold/6 border-gold/15'
+        }`}>
           <div>
             <p className="font-body text-xs text-silver uppercase tracking-widest">Abonelik</p>
-            <p className="font-display text-gold font-medium mt-0.5">
+            <p className={`font-display font-medium mt-0.5 ${subExpired ? 'text-red-400' : expiringSoon ? 'text-orange-400' : 'text-gold'}`}>
               {restaurant.subscription.type === 'TRIAL' ? 'Deneme' : 'Yillik'}
             </p>
           </div>
           <div className="text-right">
-            <p className="font-display text-2xl text-snow font-semibold">{daysLeft}</p>
-            <p className="font-body text-xs text-silver">gun kaldi</p>
+            <p className={`font-display text-2xl font-semibold ${subExpired ? 'text-red-400' : expiringSoon ? 'text-orange-400' : 'text-snow'}`}>
+              {subExpired ? 'Sona erdi' : daysLeft}
+            </p>
+            {!subExpired && <p className="font-body text-xs text-silver">gun kaldi</p>}
           </div>
         </div>
       )}
