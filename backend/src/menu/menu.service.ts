@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -20,6 +20,10 @@ export class MenuService {
         workingHours: true,
         wifiInfo: true,
         showWelcome: true,
+        instagramUrl: true,
+        tiktokUrl: true,
+        googleMapsUrl: true,
+        googlePlaceId: true,
         status: true,
         subscription: { select: { endsAt: true } },
         categories: {
@@ -47,11 +51,23 @@ export class MenuService {
     if (!restaurant) throw new NotFoundException('Menü bulunamadı.');
 
     const subActive = restaurant.subscription && new Date(restaurant.subscription.endsAt) > new Date();
-    if (!subActive) throw new NotFoundException('Menü bulunamadı.');
-
-    await this.prisma.menuScan.create({ data: { restaurantId: restaurant.id } });
+    if (!subActive) {
+      throw new HttpException(
+        { message: 'Bu restoranın menüsü şu an kullanılamıyor.', code: 'SUBSCRIPTION_EXPIRED' },
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
 
     const { subscription, ...rest } = restaurant;
     return rest;
+  }
+
+  async recordScan(slug: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (!restaurant) return;
+    await this.prisma.menuScan.create({ data: { restaurantId: restaurant.id } });
   }
 }

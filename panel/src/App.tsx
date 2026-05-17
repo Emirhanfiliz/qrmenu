@@ -43,10 +43,20 @@ export default function App() {
             <Route path="/qr-code" element={<QrCodePage />} />
             <Route path="/design" element={<DesignPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
     </ToastProvider>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center py-32 gap-3">
+      <p className="font-display text-4xl text-gold font-semibold">404</p>
+      <p className="font-body text-silver text-sm">Bu sayfa bulunamadı.</p>
+    </div>
   );
 }

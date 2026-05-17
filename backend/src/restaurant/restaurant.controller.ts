@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { IsBoolean, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { RestaurantService } from './restaurant.service';
@@ -17,6 +17,10 @@ class UpdateDesignDto {
   @IsOptional() @IsString() workingHours?: string;
   @IsOptional() @IsString() wifiInfo?: string;
   @IsOptional() @IsBoolean() showWelcome?: boolean;
+  @IsOptional() @IsString() instagramUrl?: string;
+  @IsOptional() @IsString() tiktokUrl?: string;
+  @IsOptional() @IsString() googleMapsUrl?: string;
+  @IsOptional() @IsString() googlePlaceId?: string;
 }
 
 class ChangePasswordDto {
@@ -57,5 +61,10 @@ export class RestaurantController {
   @Get('stats')
   getStats(@Req() req: any) {
     return this.restaurantService.getStats(req.user.id);
+  }
+
+  @Get('places-search')
+  searchGooglePlace(@Query('q') q: string) {
+    return this.restaurantService.searchGooglePlace(q || '');
   }
 }

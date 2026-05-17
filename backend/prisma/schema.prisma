@@ -32,6 +32,10 @@ model Restaurant {
   workingHours    String?
   wifiInfo        String?
   showWelcome     Boolean          @default(false)
+  instagramUrl    String?
+  tiktokUrl       String?
+  googleMapsUrl   String?
+  googlePlaceId   String?
   status          RestaurantStatus @default(PENDING)
   emailVerifiedAt DateTime?
   createdAt       DateTime         @default(now())

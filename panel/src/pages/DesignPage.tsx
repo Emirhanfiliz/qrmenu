@@ -14,6 +14,10 @@ type Design = {
   workingHours: string;
   wifiInfo: string;
   showWelcome: boolean;
+  instagramUrl: string;
+  tiktokUrl: string;
+  googleMapsUrl: string;
+  googlePlaceId: string;
 };
 
 const THEMES = [
@@ -44,7 +48,14 @@ export default function DesignPage() {
     workingHours: '',
     wifiInfo: '',
     showWelcome: false,
+    instagramUrl: '',
+    tiktokUrl: '',
+    googleMapsUrl: '',
+    googlePlaceId: '',
   });
+  const [placeSearch, setPlaceSearch] = useState('');
+  const [placeResults, setPlaceResults] = useState<{ placeId: string; name: string; address: string }[]>([]);
+  const [placeSearching, setPlaceSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -61,10 +72,28 @@ export default function DesignPage() {
         workingHours: data.workingHours ?? '',
         wifiInfo: data.wifiInfo ?? '',
         showWelcome: data.showWelcome ?? false,
+        instagramUrl: data.instagramUrl ?? '',
+        tiktokUrl: data.tiktokUrl ?? '',
+        googleMapsUrl: data.googleMapsUrl ?? '',
+        googlePlaceId: data.googlePlaceId ?? '',
       });
       setLoading(false);
     });
   }, []);
+
+  const searchPlace = async () => {
+    if (!placeSearch.trim()) return;
+    setPlaceSearching(true);
+    setPlaceResults([]);
+    try {
+      const results = await api.get(`/restaurant/places-search?q=${encodeURIComponent(placeSearch)}`);
+      setPlaceResults(results);
+    } catch {
+      // ignore
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -81,16 +110,23 @@ export default function DesignPage() {
     }
   };
 
-  const field = (label: string, key: keyof Omit<Design, 'theme' | 'showWelcome' | 'coverUrl'>, placeholder: string) => (
+  const field = (label: string, key: keyof Omit<Design, 'theme' | 'showWelcome' | 'coverUrl'>, placeholder: string, prefix?: string) => (
     <div>
       <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">{label}</label>
-      <input
-        type="text"
-        value={design[key] as string}
-        onChange={(e) => setDesign({ ...design, [key]: e.target.value })}
-        placeholder={placeholder}
-        className="w-full bg-elevated border border-border rounded-lg px-4 py-2.5 font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors"
-      />
+      <div className="flex">
+        {prefix && (
+          <span className="px-3 py-2.5 bg-elevated border border-r-0 border-border rounded-l-lg font-body text-xs text-silver/60 flex items-center">
+            {prefix}
+          </span>
+        )}
+        <input
+          type="text"
+          value={design[key] as string}
+          onChange={(e) => setDesign({ ...design, [key]: e.target.value })}
+          placeholder={placeholder}
+          className={`w-full bg-elevated border border-border font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors px-4 py-2.5 ${prefix ? 'rounded-r-lg' : 'rounded-lg'}`}
+        />
+      </div>
     </div>
   );
 
@@ -195,6 +231,77 @@ export default function DesignPage() {
           {field('Telefon', 'phone', '0212 999 88 77')}
           {field('Calisma Saatleri', 'workingHours', '09:00 - 23:00')}
           {field('Wi-Fi', 'wifiInfo', 'Sifre: cafe2025')}
+        </div>
+      </div>
+
+      {/* Social media */}
+      <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
+        <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Sosyal Medya & Yorumlar</p>
+        <div className="flex flex-col gap-4">
+          {field('Instagram', 'instagramUrl', 'https://instagram.com/restoraniniz')}
+          {field('TikTok', 'tiktokUrl', 'https://tiktok.com/@restoraniniz')}
+          {field('Google Maps URL', 'googleMapsUrl', 'https://maps.google.com/...')}
+
+          {/* Google Place ID for reviews */}
+          <div>
+            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Google Yorum ID (Place ID)</label>
+            <input
+              type="text"
+              value={design.googlePlaceId}
+              onChange={(e) => setDesign({ ...design, googlePlaceId: e.target.value })}
+              placeholder="ChIJxxxxxxxxxxxxxxxxxx"
+              className="w-full bg-elevated border border-border rounded-lg px-4 py-2.5 font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors mb-2"
+            />
+            {design.googlePlaceId && (
+              <a
+                href={`https://search.google.com/local/writereview?placeid=${design.googlePlaceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-body text-xs text-gold/70 hover:text-gold transition-colors"
+              >
+                Yorum linkini test et →
+              </a>
+            )}
+
+            {/* Place ID auto-search */}
+            <div className="mt-3 p-3 bg-elevated border border-border rounded-xl">
+              <p className="font-body text-xs text-silver mb-2">Place ID'yi otomatik bul</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={placeSearch}
+                  onChange={(e) => setPlaceSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && searchPlace()}
+                  placeholder="Restoran adı ve şehir..."
+                  className="flex-1 bg-surface border border-border rounded-lg px-3 py-2 font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={searchPlace}
+                  disabled={placeSearching}
+                  className="px-4 py-2 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-sm font-body rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap"
+                >
+                  {placeSearching ? '...' : 'Ara'}
+                </button>
+              </div>
+              {placeResults.length > 0 && (
+                <div className="mt-2 flex flex-col gap-1.5">
+                  {placeResults.map((r) => (
+                    <button
+                      key={r.placeId}
+                      type="button"
+                      onClick={() => { setDesign({ ...design, googlePlaceId: r.placeId }); setPlaceResults([]); }}
+                      className="text-left p-2.5 bg-surface hover:bg-gold/8 border border-border rounded-lg transition-colors"
+                    >
+                      <p className="font-body text-sm text-snow">{r.name}</p>
+                      <p className="font-body text-xs text-silver mt-0.5">{r.address}</p>
+                      <p className="font-body text-xs text-gold/60 mt-0.5">{r.placeId}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
