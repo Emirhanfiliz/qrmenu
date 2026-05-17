@@ -19,12 +19,14 @@ const emptyForm = { categoryId: '', name: '', description: '', price: '', imageU
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [listLoading, setListLoading] = useState(true);
   const [filterCat, setFilterCat] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [listError, setListError] = useState('');
   const [dragging, setDragging] = useState<string | null>(null);
   const dragOver = useRef<string | null>(null);
 
@@ -33,7 +35,14 @@ export default function ProductsPage() {
     api.get('/categories').then(setCategories).catch(() => {});
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    Promise.all([
+      api.get('/products').then(setProducts),
+      api.get('/categories').then(setCategories),
+    ])
+      .catch(() => setListError('Veriler yüklenemedi.'))
+      .finally(() => setListLoading(false));
+  }, []);
 
   const openNew = () => { setEditing(null); setForm({ ...emptyForm, categoryId: categories[0]?.id ?? '' }); setShowForm(true); };
   const openEdit = (p: Product) => {
@@ -65,13 +74,21 @@ export default function ProductsPage() {
 
   const remove = async (id: string) => {
     if (!confirm('Urunu silmek istediginize emin misiniz?')) return;
-    await api.delete(`/products/${id}`).catch(() => {});
-    load();
+    try {
+      await api.delete(`/products/${id}`);
+      load();
+    } catch (err: any) {
+      setListError(err.message);
+    }
   };
 
   const toggleAvailable = async (p: Product) => {
-    await api.patch(`/products/${p.id}`, { isAvailable: !p.isAvailable }).catch(() => {});
-    load();
+    try {
+      await api.patch(`/products/${p.id}`, { isAvailable: !p.isAvailable });
+      load();
+    } catch (err: any) {
+      setListError(err.message);
+    }
   };
 
   /* ── Drag & Drop ── */
@@ -158,8 +175,18 @@ export default function ProductsPage() {
         </div>
       )}
 
+      {listError && <p className="font-body text-red-400 text-sm mb-4">{listError}</p>}
+
       {/* List */}
-      {filtered.length === 0 ? (
+      {listLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="w-2 h-2 rounded-full bg-gold/50 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </div>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-xl py-16 text-center">
           <p className="font-body text-silver">Henuz urun yok.</p>
         </div>

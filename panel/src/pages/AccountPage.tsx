@@ -12,7 +12,7 @@ export default function AccountPage() {
     setError('');
     setSuccess('');
     if (form.newPassword !== form.confirm) {
-      setError('Yeni sifreler eslesmiyorÀ.');
+      setError('Yeni sifreler eslesmiyor.');
       return;
     }
     if (form.newPassword.length < 6) {

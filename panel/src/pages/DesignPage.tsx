@@ -48,6 +48,7 @@ export default function DesignPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     api.get('/restaurant/design').then((data: Design) => {
@@ -68,10 +69,16 @@ export default function DesignPage() {
   const save = async () => {
     setSaving(true);
     setSaved(false);
-    await api.patch('/restaurant/design', design);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSaveError('');
+    try {
+      await api.patch('/restaurant/design', design);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err: any) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const field = (label: string, key: keyof Omit<Design, 'theme' | 'showWelcome' | 'coverUrl'>, placeholder: string) => (
@@ -87,7 +94,15 @@ export default function DesignPage() {
     </div>
   );
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="flex items-center justify-center py-32">
+      <div className="flex gap-1.5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="w-2 h-2 rounded-full bg-gold/50 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-2xl">
@@ -183,6 +198,9 @@ export default function DesignPage() {
         </div>
       </div>
 
+      {saveError && (
+        <p className="font-body text-red-400 text-sm mb-3">{saveError}</p>
+      )}
       <button
         onClick={save}
         disabled={saving}

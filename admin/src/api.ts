@@ -1,4 +1,4 @@
-const BASE = 'http://localhost:3001';
+const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 function token() {
   return localStorage.getItem('admin_token');
@@ -14,7 +14,10 @@ async function req(method: string, path: string, body?: unknown) {
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Bir hata oluştu.');
+  if (!res.ok) {
+    const msg = Array.isArray(data.message) ? data.message[0] : (data.message || 'Bir hata oluştu.');
+    throw new Error(msg);
+  }
   return data;
 }
 
