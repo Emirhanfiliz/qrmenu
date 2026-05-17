@@ -1,8 +1,20 @@
+import { toast } from './lib/toast';
+
 const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 function token() {
   return localStorage.getItem('token');
 }
+
+// Paths that should not trigger automatic toasts
+const SILENT_PATTERNS = ['/auth/', '/upload', 'reorder', 'change-password'];
+const isSilent = (path: string) => SILENT_PATTERNS.some(p => path.includes(p));
+
+const SUCCESS_MSG: Record<string, string> = {
+  POST: 'Eklendi.',
+  PATCH: 'Güncellendi.',
+  DELETE: 'Silindi.',
+};
 
 async function req(method: string, path: string, body?: unknown) {
   const res = await fetch(`${BASE}${path}`, {
@@ -16,7 +28,11 @@ async function req(method: string, path: string, body?: unknown) {
   const data = await res.json();
   if (!res.ok) {
     const msg = Array.isArray(data.message) ? data.message[0] : (data.message || 'Bir hata oluştu.');
+    if (!isSilent(path)) toast(msg, 'error');
     throw new Error(msg);
+  }
+  if (method !== 'GET' && !isSilent(path) && SUCCESS_MSG[method]) {
+    toast(SUCCESS_MSG[method]);
   }
   return data;
 }

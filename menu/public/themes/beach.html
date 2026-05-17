@@ -515,6 +515,16 @@
           <span class="lbl">Alerjen</span>
           <p id="sAlg"></p>
         </div>
+        <div class="detail" id="sMetaArea" style="display:none;flex-direction:row;gap:20px">
+          <div id="sPrepArea" style="display:none">
+            <span class="lbl">Hazırlanma</span>
+            <p id="sPrep" style="font-weight:600;color:#0db5af"></p>
+          </div>
+          <div id="sCalArea" style="display:none">
+            <span class="lbl">Kalori</span>
+            <p id="sCal" style="font-weight:600;color:#0db5af"></p>
+          </div>
+        </div>
       </div>
       <button class="back-btn" onclick="closeSheet()">KAPAT</button>
     </div>
@@ -556,7 +566,9 @@
           />
           <div class="card-body">
             <h3>${item.name}</h3>
-            <div class="price">${item.price} TL</div>
+            ${item.discountedPrice
+              ? `<div style="display:flex;flex-direction:column;gap:1px;margin-top:6px"><span style="font-size:11px;color:#999;text-decoration:line-through">${item.price}</span><span class="price">${item.discountedPrice}</span></div>`
+              : `<div class="price">${item.price}</div>`}
           </div>
         `;
         grid.appendChild(div);
@@ -568,7 +580,12 @@
       document.getElementById('sImg').src = item.image || fallback;
       document.getElementById('sImg').onerror = function() { this.src = fallback; };
       document.getElementById('sName').textContent = item.name;
-      document.getElementById('sPrice').textContent = item.price + ' TL';
+      if (item.discountedPrice) {
+        document.getElementById('sPrice').innerHTML =
+          `<del style="font-size:16px;color:#aaa;font-weight:500">${item.price}</del> ${item.discountedPrice}`;
+      } else {
+        document.getElementById('sPrice').textContent = item.price;
+      }
       document.getElementById('sDesc').textContent = item.desc || '';
 
       const ingArea = document.getElementById('sIngArea');
@@ -583,6 +600,22 @@
         document.getElementById('sAlg').textContent = item.alg;
         algArea.style.display = 'block';
       } else { algArea.style.display = 'none'; }
+
+      const metaArea = document.getElementById('sMetaArea');
+      const prepArea = document.getElementById('sPrepArea');
+      const calArea = document.getElementById('sCalArea');
+      let hasMeta = false;
+      if (item.preparationTime) {
+        document.getElementById('sPrep').textContent = item.preparationTime;
+        prepArea.style.display = 'block';
+        hasMeta = true;
+      } else { prepArea.style.display = 'none'; }
+      if (item.calories) {
+        document.getElementById('sCal').textContent = item.calories;
+        calArea.style.display = 'block';
+        hasMeta = true;
+      } else { calArea.style.display = 'none'; }
+      metaArea.style.display = hasMeta ? 'flex' : 'none';
 
       document.getElementById('ov').classList.add('show');
     }

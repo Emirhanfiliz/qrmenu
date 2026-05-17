@@ -12,11 +12,11 @@ export class AnnouncementService {
     });
   }
 
-  create(restaurantId: string, dto: { title: string; body: string }) {
+  create(restaurantId: string, dto: { title: string; body: string; imageUrl?: string }) {
     return this.prisma.announcement.create({ data: { restaurantId, ...dto } });
   }
 
-  async update(restaurantId: string, id: string, dto: { title?: string; body?: string; isActive?: boolean }) {
+  async update(restaurantId: string, id: string, dto: { title?: string; body?: string; imageUrl?: string; isActive?: boolean }) {
     await this.assertOwner(restaurantId, id);
     return this.prisma.announcement.update({ where: { id }, data: dto });
   }

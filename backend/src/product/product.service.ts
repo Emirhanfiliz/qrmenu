@@ -21,6 +21,10 @@ export class ProductService {
     name: string;
     description?: string;
     price: number;
+    discountedPrice?: number;
+    preparationTime?: number;
+    calories?: number;
+    allergens?: string;
     imageUrl?: string;
     isAvailable?: boolean;
   }) {
@@ -33,6 +37,10 @@ export class ProductService {
     name?: string;
     description?: string;
     price?: number;
+    discountedPrice?: number;
+    preparationTime?: number;
+    calories?: number;
+    allergens?: string;
     imageUrl?: string;
     isAvailable?: boolean;
     order?: number;

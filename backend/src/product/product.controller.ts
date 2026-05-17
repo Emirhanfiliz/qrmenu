@@ -9,6 +9,10 @@ class CreateProductDto {
   @IsString() name: string;
   @IsOptional() @IsString() description?: string;
   @IsNumber() @Min(0) @Type(() => Number) price: number;
+  @IsOptional() @IsNumber() @Min(0) @Type(() => Number) discountedPrice?: number;
+  @IsOptional() @IsInt() @Min(0) @Type(() => Number) preparationTime?: number;
+  @IsOptional() @IsInt() @Min(0) @Type(() => Number) calories?: number;
+  @IsOptional() @IsString() allergens?: string;
   @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsBoolean() isAvailable?: boolean;
 }
@@ -18,6 +22,10 @@ class UpdateProductDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsNumber() @Min(0) @Type(() => Number) price?: number;
+  @IsOptional() @IsNumber() @Min(0) @Type(() => Number) discountedPrice?: number;
+  @IsOptional() @IsInt() @Min(0) @Type(() => Number) preparationTime?: number;
+  @IsOptional() @IsInt() @Min(0) @Type(() => Number) calories?: number;
+  @IsOptional() @IsString() allergens?: string;
   @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsBoolean() isAvailable?: boolean;
   @IsOptional() @IsInt() @Min(0) order?: number;

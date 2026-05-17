@@ -32,14 +32,14 @@ export class MenuService {
             products: {
               where: { isAvailable: true },
               orderBy: { order: 'asc' },
-              select: { id: true, name: true, description: true, price: true, imageUrl: true },
+              select: { id: true, name: true, description: true, price: true, discountedPrice: true, preparationTime: true, calories: true, allergens: true, imageUrl: true },
             },
           },
         },
         announcements: {
           where: { isActive: true },
           orderBy: { createdAt: 'desc' },
-          select: { id: true, title: true, body: true, createdAt: true },
+          select: { id: true, title: true, body: true, imageUrl: true, createdAt: true },
         },
       },
     });

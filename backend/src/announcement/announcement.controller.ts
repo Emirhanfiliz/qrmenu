@@ -6,11 +6,13 @@ import { AnnouncementService } from './announcement.service';
 class CreateAnnouncementDto {
   @IsString() title: string;
   @IsString() body: string;
+  @IsOptional() @IsString() imageUrl?: string;
 }
 
 class UpdateAnnouncementDto {
   @IsOptional() @IsString() title?: string;
   @IsOptional() @IsString() body?: string;
+  @IsOptional() @IsString() imageUrl?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
 }
 

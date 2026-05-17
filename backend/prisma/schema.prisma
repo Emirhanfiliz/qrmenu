@@ -72,16 +72,20 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  price       Decimal  @db.Decimal(10, 2)
-  imageUrl    String?
-  isAvailable Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  discountedPrice Decimal? @db.Decimal(10, 2)
+  preparationTime Int?
+  calories        Int?
+  allergens       String?
+  imageUrl        String?
+  isAvailable     Boolean  @default(true)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
 
   @@index([categoryId])
   @@map("products")
@@ -93,6 +97,7 @@ model Announcement {
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   title        String
   body         String
+  imageUrl     String?
   isActive     Boolean    @default(true)
   createdAt    DateTime   @default(now())
 

@@ -601,6 +601,10 @@
         <div class="sheet-price" id="sPrice"></div>
         <p class="sheet-desc" id="sDesc"></p>
         <div class="detail-grid">
+          <div id="prepArea" class="detail-section" style="display:none">
+            <h4>Hazırlanma</h4>
+            <p id="sPrep"></p>
+          </div>
           <div id="calArea" class="detail-section" style="display:none">
             <h4 id="lbl-cal">Kalori</h4>
             <p id="sCal"></p>
@@ -702,7 +706,9 @@
             desc: item.desc || '',
             ing: item.ing || '',
             alg: item.alg || '',
-            cal: item.cal || ''
+            cal: item.cal || '',
+            discountedPrice: item.discountedPrice || '',
+            preparationTime: item.preparationTime || ''
           });
         });
       });
@@ -870,7 +876,9 @@
             </div>
             <h3 class="card-title">${item.name}</h3>
             ${item.desc ? `<p class="card-desc">${item.desc}</p>` : ''}
-            <div class="price-tag">${item.price}</div>`;
+            ${item.discountedPrice
+              ? `<div style="display:flex;flex-direction:column;gap:1px"><del style="font-size:11px;opacity:0.5">${item.price}</del><div class="price-tag">${item.discountedPrice}</div></div>`
+              : `<div class="price-tag">${item.price}</div>`}`;
           grid.appendChild(card);
         });
         grid.classList.remove('switching');
@@ -884,7 +892,12 @@
       sImg.style.display = src ? 'block' : 'none';
 
       document.getElementById('sName').textContent  = item.name;
-      document.getElementById('sPrice').textContent = item.price;
+      if (item.discountedPrice) {
+        document.getElementById('sPrice').innerHTML =
+          `<del style="opacity:0.45;font-size:16px">${item.price}</del> ${item.discountedPrice}`;
+      } else {
+        document.getElementById('sPrice').textContent = item.price;
+      }
       document.getElementById('sDesc').textContent  = item.desc || '';
 
       const ingArea = document.getElementById('ingArea');
@@ -897,6 +910,10 @@
       else { algArea.style.display = 'none'; }
       if (item.cal) { document.getElementById('sCal').textContent = item.cal + ' kcal'; calArea.style.display = 'block'; }
       else { calArea.style.display = 'none'; }
+
+      const prepArea = document.getElementById('prepArea');
+      if (item.preparationTime) { document.getElementById('sPrep').textContent = item.preparationTime; prepArea.style.display = 'block'; }
+      else { prepArea.style.display = 'none'; }
 
       document.getElementById('ov').classList.add('show');
       document.body.style.overflow = 'hidden';

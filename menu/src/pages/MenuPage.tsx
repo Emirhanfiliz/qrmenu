@@ -7,6 +7,10 @@ type Product = {
   name: string;
   description: string | null;
   price: string;
+  discountedPrice: string | null;
+  preparationTime: number | null;
+  calories: number | null;
+  allergens: string | null;
   imageUrl: string | null;
 };
 
@@ -21,6 +25,7 @@ type Announcement = {
   id: string;
   title: string;
   body: string;
+  imageUrl: string | null;
 };
 
 type MenuData = {
@@ -49,8 +54,18 @@ export default function MenuPage() {
   const [menuData, setMenuData] = useState<MenuData | null>(null);
   const [themeSrc, setThemeSrc] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [showAnnouncements, setShowAnnouncements] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const iframeReady = useRef(false);
+  const announcementsShown = useRef(false);
+
+  const formatPrice = (val: string) =>
+    Number(val).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' TL';
+
+  const parseAllergens = (raw: string | null): string[] => {
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
+  };
 
   const inject = (data: MenuData) => {
     const win = iframeRef.current?.contentWindow as any;
@@ -74,14 +89,25 @@ export default function MenuPage() {
         catImage: cat.imageUrl ?? '',
         items: cat.products.map((p) => ({
           name: p.name,
-          price: Number(p.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' TL',
+          price: formatPrice(p.price),
+          discountedPrice: p.discountedPrice ? formatPrice(p.discountedPrice) : '',
+          preparationTime: p.preparationTime ? `${p.preparationTime} dk` : '',
+          calories: p.calories ? `${p.calories} kcal` : '',
           desc: p.description ?? '',
           image: p.imageUrl ?? '',
           ing: '',
-          alg: '',
+          alg: parseAllergens(p.allergens).join(', '),
+          cal: p.calories ? String(p.calories) : '',
         })),
       })),
     });
+  };
+
+  const maybeShowAnnouncements = (data: MenuData) => {
+    if (!announcementsShown.current && data.announcements.length > 0) {
+      announcementsShown.current = true;
+      setShowAnnouncements(true);
+    }
   };
 
   useEffect(() => {
@@ -97,11 +123,17 @@ export default function MenuPage() {
 
   const handleIframeLoad = () => {
     iframeReady.current = true;
-    if (menuData) inject(menuData);
+    if (menuData) {
+      inject(menuData);
+      maybeShowAnnouncements(menuData);
+    }
   };
 
   useEffect(() => {
-    if (menuData && iframeReady.current) inject(menuData);
+    if (menuData && iframeReady.current) {
+      inject(menuData);
+      maybeShowAnnouncements(menuData);
+    }
   }, [menuData]);
 
   if (error) {
@@ -129,6 +161,7 @@ export default function MenuPage() {
           <style>{`@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}`}</style>
         </div>
       )}
+
       {themeSrc && (
         <iframe
           ref={iframeRef}
@@ -137,6 +170,60 @@ export default function MenuPage() {
           title={menuData?.name ?? 'Menu'}
           style={{ width: '100vw', height: '100vh', border: 'none', display: 'block' }}
         />
+      )}
+
+      {/* Announcement modal */}
+      {showAnnouncements && menuData && menuData.announcements.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4"
+          style={{ background: 'rgba(0,0,0,0.55)' }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl overflow-hidden"
+            style={{ background: '#fff', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+          >
+            <div
+              style={{
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              {menuData.announcements.map((a, i) => (
+                <div key={a.id}>
+                  {a.imageUrl && (
+                    <img
+                      src={a.imageUrl}
+                      alt={a.title}
+                      style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block' }}
+                    />
+                  )}
+                  <div style={{ padding: '20px 20px', borderBottom: i < menuData.announcements.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                    <p style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', margin: 0 }}>{a.title}</p>
+                    <p style={{ fontSize: '14px', color: '#555', marginTop: '6px', lineHeight: 1.5 }}>{a.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', background: '#fff', flexShrink: 0 }}>
+              <button
+                onClick={() => setShowAnnouncements(false)}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#1a1a1a',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
