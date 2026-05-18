@@ -9,9 +9,11 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
-  menuScan: { count: jest.fn() },
+  menuScan: { count: jest.fn(), deleteMany: jest.fn() },
   category: { count: jest.fn() },
   product: { count: jest.fn() },
+  announcement: { count: jest.fn() },
+  $queryRaw: jest.fn(),
 };
 
 describe('RestaurantService', () => {
@@ -104,20 +106,20 @@ describe('RestaurantService', () => {
 
   // ── getStats ──────────────────────────────────────────────
   describe('getStats', () => {
-    // AC-6: Returns correct aggregated stats
-    it('returns totalScans, recentScans, categoryCount, productCount', async () => {
-      mockPrisma.menuScan.count
-        .mockResolvedValueOnce(150) // totalScans
-        .mockResolvedValueOnce(30); // recentScans
+    it('returns stat fields and dailyScans', async () => {
+      mockPrisma.menuScan.count.mockResolvedValue(10);
       mockPrisma.category.count.mockResolvedValue(5);
       mockPrisma.product.count.mockResolvedValue(42);
+      mockPrisma.announcement.count.mockResolvedValue(2);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
 
       const result = await service.getStats('r1');
 
-      expect(result.totalScans).toBe(150);
-      expect(result.recentScans).toBe(30);
+      expect(result.todayScans).toBe(10);
       expect(result.categoryCount).toBe(5);
       expect(result.productCount).toBe(42);
+      expect(result.activeAnnouncementCount).toBe(2);
+      expect(Array.isArray(result.dailyScans)).toBe(true);
     });
   });
 });

@@ -1,7 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import Layout from './components/Layout';
+import { TooltipProvider } from './components/Tooltip';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
 import AccountPage from './pages/AccountPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import CategoriesPage from './pages/CategoriesPage';
@@ -11,6 +12,7 @@ import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import QrCodePage from './pages/QrCodePage';
 import RegisterPage from './pages/RegisterPage';
+import RestaurantInfoPage from './pages/RestaurantInfoPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { restaurant, loading } = useAuth();
@@ -28,9 +30,25 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ToastProvider>
     <AuthProvider>
-      <BrowserRouter>
+      <TooltipProvider>
+        <BrowserRouter>
+        <Toaster
+          position="bottom-right"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: '#1a1a2e',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e2e8f0',
+              fontFamily: 'inherit',
+              fontSize: '14px',
+              borderRadius: '12px',
+            },
+          }}
+          richColors
+          closeButton
+        />
         <Routes>
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
@@ -42,13 +60,14 @@ export default function App() {
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/qr-code" element={<QrCodePage />} />
             <Route path="/design" element={<DesignPage />} />
+            <Route path="/restaurant-info" element={<RestaurantInfoPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </TooltipProvider>
     </AuthProvider>
-    </ToastProvider>
   );
 }
 

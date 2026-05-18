@@ -24,7 +24,8 @@ const NAV_GROUPS = [
   {
     label: 'BİLGİ',
     items: [
-      { to: '/account', label: 'Hesap Bilgileri', d: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+      { to: '/restaurant-info', label: 'Restoran Bilgileri', d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+      { to: '/account',         label: 'Hesap',             d: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     ],
   },
 ];
@@ -118,10 +119,10 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-void flex flex-col">
+    <div className="h-screen bg-void flex flex-col overflow-hidden">
 
       {/* ── Top Navbar ── */}
-      <header className="h-14 bg-surface border-b border-border flex items-center px-5 gap-4 sticky top-0 z-30 flex-shrink-0">
+      <header className="h-14 bg-surface border-b border-border flex items-center px-5 gap-4 flex-shrink-0 z-30">
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 flex-shrink-0">
@@ -181,7 +182,7 @@ export default function Layout() {
       </header>
 
       {/* ── Body ── */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 overflow-hidden">
 
         {/* Desktop Sidebar */}
         <aside

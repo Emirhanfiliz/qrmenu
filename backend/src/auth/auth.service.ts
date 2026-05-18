@@ -61,6 +61,7 @@ export class AuthService {
       restaurant: {
         id: restaurant.id,
         name: restaurant.name,
+        slug: restaurant.slug,
         email: restaurant.email,
         status: restaurant.status,
         subscription: restaurant.subscription,

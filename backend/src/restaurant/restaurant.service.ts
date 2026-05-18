@@ -113,35 +113,62 @@ export class RestaurantService {
   }
 
   async getStats(restaurantId: string) {
-    const last30Days = new Date();
-    last30Days.setDate(last30Days.getDate() - 30);
-    last30Days.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const startOf = (daysAgo: number) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - daysAgo);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
 
-    const [totalScans, categoryCount, productCount, recentScans, dailyRaw] = await Promise.all([
-      this.prisma.menuScan.count({ where: { restaurantId } }),
+    const todayStart    = startOf(0);
+    const weekStart     = startOf(7);
+    const lastWeekStart = startOf(14);
+    const monthStart    = startOf(30);
+    const ninetyStart   = startOf(90);
+
+    const [
+      todayScans, weekScans, lastWeekScans, monthScans, ninetyDayScans,
+      categoryCount, productCount, activeAnnouncementCount,
+      dailyRaw,
+    ] = await Promise.all([
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: todayStart } } }),
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: weekStart } } }),
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: lastWeekStart, lt: weekStart } } }),
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: monthStart } } }),
+      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: ninetyStart } } }),
       this.prisma.category.count({ where: { restaurantId } }),
       this.prisma.product.count({ where: { category: { restaurantId } } }),
-      this.prisma.menuScan.count({ where: { restaurantId, scannedAt: { gte: last30Days } } }),
+      this.prisma.announcement.count({ where: { restaurantId, isActive: true } }),
       this.prisma.$queryRaw<{ date: string; count: bigint }[]>`
         SELECT TO_CHAR(DATE("scannedAt"), 'YYYY-MM-DD') as date, COUNT(*)::bigint as count
         FROM menu_scans
         WHERE "restaurantId" = ${restaurantId}
-          AND "scannedAt" >= ${last30Days}
+          AND "scannedAt" >= ${startOf(13)}
         GROUP BY DATE("scannedAt")
         ORDER BY DATE("scannedAt")
       `,
     ]);
 
-    // Fill in zero-count days for the last 30 days
     const countMap = new Map(dailyRaw.map((r) => [r.date, Number(r.count)]));
     const dailyScans: { date: string; count: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       dailyScans.push({ date: key, count: countMap.get(key) ?? 0 });
     }
 
-    return { totalScans, recentScans, categoryCount, productCount, dailyScans };
+    return {
+      todayScans,
+      weekScans,
+      lastWeekScans,
+      monthScans,
+      ninetyDayScans,
+      categoryCount,
+      productCount,
+      activeAnnouncementCount,
+      dailyScans,
+    };
   }
 }

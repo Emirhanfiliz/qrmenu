@@ -1,24 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
-import ImageUpload from '../components/ImageUpload';
 
 const MENU_BASE = import.meta.env.VITE_MENU_BASE || 'http://localhost:5173';
 
 type Design = {
-  logoUrl: string;
   theme: string;
-  tagline: string;
-  coverUrl: string;
-  address: string;
-  phone: string;
-  workingHours: string;
-  wifiInfo: string;
   showWelcome: boolean;
-  instagramUrl: string;
-  tiktokUrl: string;
-  googleMapsUrl: string;
-  googlePlaceId: string;
 };
 
 const THEMES = [
@@ -40,63 +28,18 @@ const THEMES = [
 
 export default function DesignPage() {
   const { restaurant } = useAuth();
-  const [design, setDesign] = useState<Design>({
-    logoUrl: '',
-    theme: 'beach',
-    tagline: '',
-    coverUrl: '',
-    address: '',
-    phone: '',
-    workingHours: '',
-    wifiInfo: '',
-    showWelcome: false,
-    instagramUrl: '',
-    tiktokUrl: '',
-    googleMapsUrl: '',
-    googlePlaceId: '',
-  });
-  const [placeSearch, setPlaceSearch] = useState('');
-  const [placeResults, setPlaceResults] = useState<{ placeId: string; name: string; address: string }[]>([]);
-  const [placeSearching, setPlaceSearching] = useState(false);
+  const [design, setDesign] = useState<Design>({ theme: 'beach', showWelcome: false });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
-    api.get('/restaurant/design').then((data: Design) => {
-      setDesign({
-        logoUrl: data.logoUrl ?? '',
-        theme: data.theme ?? 'beach',
-        tagline: data.tagline ?? '',
-        coverUrl: data.coverUrl ?? '',
-        address: data.address ?? '',
-        phone: data.phone ?? '',
-        workingHours: data.workingHours ?? '',
-        wifiInfo: data.wifiInfo ?? '',
-        showWelcome: data.showWelcome ?? false,
-        instagramUrl: data.instagramUrl ?? '',
-        tiktokUrl: data.tiktokUrl ?? '',
-        googleMapsUrl: data.googleMapsUrl ?? '',
-        googlePlaceId: data.googlePlaceId ?? '',
-      });
+    api.get('/restaurant/design').then((data: any) => {
+      setDesign({ theme: data.theme ?? 'beach', showWelcome: data.showWelcome ?? false });
       setLoading(false);
     });
   }, []);
-
-  const searchPlace = async () => {
-    if (!placeSearch.trim()) return;
-    setPlaceSearching(true);
-    setPlaceResults([]);
-    try {
-      const results = await api.get(`/restaurant/places-search?q=${encodeURIComponent(placeSearch)}`);
-      setPlaceResults(results);
-    } catch {
-      // ignore
-    } finally {
-      setPlaceSearching(false);
-    }
-  };
 
   const save = async () => {
     setSaving(true);
@@ -113,26 +56,6 @@ export default function DesignPage() {
     }
   };
 
-  const field = (label: string, key: keyof Omit<Design, 'theme' | 'showWelcome' | 'coverUrl'>, placeholder: string, prefix?: string) => (
-    <div>
-      <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">{label}</label>
-      <div className="flex">
-        {prefix && (
-          <span className="px-3 py-2.5 bg-elevated border border-r-0 border-border rounded-l-lg font-body text-xs text-silver/60 flex items-center">
-            {prefix}
-          </span>
-        )}
-        <input
-          type="text"
-          value={design[key] as string}
-          onChange={(e) => setDesign({ ...design, [key]: e.target.value })}
-          placeholder={placeholder}
-          className={`w-full bg-elevated border border-border font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors px-4 py-2.5 ${prefix ? 'rounded-r-lg' : 'rounded-lg'}`}
-        />
-      </div>
-    </div>
-  );
-
   if (loading) return (
     <div className="flex items-center justify-center py-32">
       <div className="flex gap-1.5">
@@ -144,11 +67,11 @@ export default function DesignPage() {
   );
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-xl mx-auto">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-snow font-semibold">Tasarim</h1>
-          <p className="font-body text-silver text-sm mt-1">Menunuzun gorsel temasini ve bilgilerini ayarlayin.</p>
+          <h1 className="font-display text-2xl text-snow font-semibold">Tasarım</h1>
+          <p className="font-body text-silver text-sm mt-1">Menünüzün görsel temasını seçin.</p>
         </div>
         {restaurant?.slug && (
           <a
@@ -157,12 +80,11 @@ export default function DesignPage() {
             rel="noopener noreferrer"
             className="px-4 py-2 border border-border text-silver hover:text-snow hover:border-silver text-sm font-body rounded-lg transition-colors"
           >
-            Onizle
+            Önizle
           </a>
         )}
       </div>
 
-      {/* Theme selector */}
       <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
         <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Tema</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -174,7 +96,7 @@ export default function DesignPage() {
                 design.theme === t.id ? 'border-gold bg-gold/8' : 'border-border bg-elevated hover:border-silver/30'
               }`}
             >
-              {/* Mini preview */}
+              {/* Mini önizleme */}
               <div className="w-full h-20 rounded-lg mb-3 overflow-hidden relative" style={{ background: t.bg }}>
                 <div className="h-5 flex items-center px-2 gap-1.5" style={{ background: t.bg, filter: 'brightness(0.7)' }}>
                   <div className="w-2 h-2 rounded-sm bg-white/20" />
@@ -203,7 +125,6 @@ export default function DesignPage() {
           ))}
         </div>
 
-        {/* Welcome toggle (only for Modern theme) */}
         {design.theme === 'new21' && (
           <label className="flex items-center gap-3 mt-4 cursor-pointer">
             <div
@@ -213,153 +134,26 @@ export default function DesignPage() {
               <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${design.showWelcome ? 'left-5' : 'left-1'}`} />
             </div>
             <div>
-              <p className="font-body text-sm text-snow">Karsılama ekranı (kapi animasyonu)</p>
-              <p className="font-body text-xs text-silver">Musteri ilk giriste animasyonlu kapi gorecek</p>
+              <p className="font-body text-sm text-snow">Karşılama ekranı (kapı animasyonu)</p>
+              <p className="font-body text-xs text-silver">Müşteri ilk girişte animasyonlu kapı görecek</p>
             </div>
           </label>
         )}
       </div>
 
-      {/* Görseller */}
-      <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Görseller</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Logo */}
-          <div className="flex flex-col gap-3">
-            <ImageUpload
-              label="Logo"
-              value={design.logoUrl}
-              onChange={(url) => setDesign({ ...design, logoUrl: url })}
-            />
-            {design.logoUrl && (
-              <div className="flex justify-center">
-                <img
-                  src={design.logoUrl}
-                  alt="Logo önizleme"
-                  className="w-20 h-20 object-contain rounded-xl bg-elevated border border-border p-2"
-                />
-              </div>
-            )}
-            <p className="font-body text-xs text-silver/50 text-center">
-              Temada karşılama ekranı ve sidebar'da görünür
-            </p>
-          </div>
+      <p className="font-body text-xs text-silver/50 text-center mb-4">
+        Logo, banner ve restoran bilgileri için{' '}
+        <a href="/account" className="text-gold/70 hover:text-gold transition-colors">Hesap Bilgileri</a>
+        {' '}sayfasına gidin.
+      </p>
 
-          {/* Banner / Cover */}
-          <div className="flex flex-col gap-3">
-            <ImageUpload
-              label="Banner (Hero Arkaplan)"
-              value={design.coverUrl}
-              onChange={(url) => setDesign({ ...design, coverUrl: url })}
-            />
-            {design.coverUrl && (
-              <div className="flex justify-center">
-                <img
-                  src={design.coverUrl}
-                  alt="Banner önizleme"
-                  className="w-full h-20 object-cover rounded-xl border border-border"
-                />
-              </div>
-            )}
-            <p className="font-body text-xs text-silver/50 text-center">
-              Menü açılış hero bölümünün arkaplanı
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Restoran bilgileri */}
-      <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Restoran Bilgileri</p>
-        <div className="flex flex-col gap-4">
-          {field('Slogan', 'tagline', 'Lezzetin yeni adresi')}
-          {field('Adres', 'address', 'Ornek Cad. No:1, Istanbul')}
-          {field('Telefon', 'phone', '0212 999 88 77')}
-          {field('Calisma Saatleri', 'workingHours', '09:00 - 23:00')}
-          {field('Wi-Fi', 'wifiInfo', 'Sifre: cafe2025')}
-        </div>
-      </div>
-
-      {/* Social media */}
-      <div className="bg-surface border border-border rounded-2xl p-6 mb-6">
-        <p className="font-body text-xs text-silver uppercase tracking-widest mb-4">Sosyal Medya & Yorumlar</p>
-        <div className="flex flex-col gap-4">
-          {field('Instagram', 'instagramUrl', 'https://instagram.com/restoraniniz')}
-          {field('TikTok', 'tiktokUrl', 'https://tiktok.com/@restoraniniz')}
-          {field('Google Maps URL', 'googleMapsUrl', 'https://maps.google.com/...')}
-
-          {/* Google Place ID for reviews */}
-          <div>
-            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Google Yorum ID (Place ID)</label>
-            <input
-              type="text"
-              value={design.googlePlaceId}
-              onChange={(e) => setDesign({ ...design, googlePlaceId: e.target.value })}
-              placeholder="ChIJxxxxxxxxxxxxxxxxxx"
-              className="w-full bg-elevated border border-border rounded-lg px-4 py-2.5 font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors mb-2"
-            />
-            {design.googlePlaceId && (
-              <a
-                href={`https://search.google.com/local/writereview?placeid=${design.googlePlaceId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-body text-xs text-gold/70 hover:text-gold transition-colors"
-              >
-                Yorum linkini test et →
-              </a>
-            )}
-
-            {/* Place ID auto-search */}
-            <div className="mt-3 p-3 bg-elevated border border-border rounded-xl">
-              <p className="font-body text-xs text-silver mb-2">Place ID'yi otomatik bul</p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={placeSearch}
-                  onChange={(e) => setPlaceSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && searchPlace()}
-                  placeholder="Restoran adı ve şehir..."
-                  className="flex-1 bg-surface border border-border rounded-lg px-3 py-2 font-body text-sm text-snow placeholder-silver/40 focus:outline-none focus:border-gold/50 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={searchPlace}
-                  disabled={placeSearching}
-                  className="px-4 py-2 bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-sm font-body rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap"
-                >
-                  {placeSearching ? '...' : 'Ara'}
-                </button>
-              </div>
-              {placeResults.length > 0 && (
-                <div className="mt-2 flex flex-col gap-1.5">
-                  {placeResults.map((r) => (
-                    <button
-                      key={r.placeId}
-                      type="button"
-                      onClick={() => { setDesign({ ...design, googlePlaceId: r.placeId }); setPlaceResults([]); }}
-                      className="text-left p-2.5 bg-surface hover:bg-gold/8 border border-border rounded-lg transition-colors"
-                    >
-                      <p className="font-body text-sm text-snow">{r.name}</p>
-                      <p className="font-body text-xs text-silver mt-0.5">{r.address}</p>
-                      <p className="font-body text-xs text-gold/60 mt-0.5">{r.placeId}</p>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {saveError && (
-        <p className="font-body text-red-400 text-sm mb-3">{saveError}</p>
-      )}
+      {saveError && <p className="font-body text-red-400 text-sm mb-3">{saveError}</p>}
       <button
         onClick={save}
         disabled={saving}
         className="w-full py-3 bg-gold hover:bg-gold-dim disabled:opacity-50 text-void font-display font-semibold rounded-lg transition-colors"
       >
-        {saving ? 'Kaydediliyor...' : saved ? 'Kaydedildi' : 'Kaydet'}
+        {saving ? 'Kaydediliyor...' : saved ? 'Kaydedildi ✓' : 'Temayı Kaydet'}
       </button>
     </div>
   );

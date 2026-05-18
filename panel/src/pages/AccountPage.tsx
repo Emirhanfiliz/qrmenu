@@ -9,23 +9,16 @@ export default function AccountPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    if (form.newPassword !== form.confirm) {
-      setError('Yeni sifreler eslesmiyor.');
-      return;
-    }
-    if (form.newPassword.length < 6) {
-      setError('Yeni sifre en az 6 karakter olmali.');
-      return;
-    }
+    setError(''); setSuccess('');
+    if (form.newPassword !== form.confirm) { setError('Yeni şifreler eşleşmiyor.'); return; }
+    if (form.newPassword.length < 6) { setError('Yeni şifre en az 6 karakter olmalı.'); return; }
     setLoading(true);
     try {
       await api.post('/restaurant/change-password', {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      setSuccess('Sifre basariyla guncellendi.');
+      setSuccess('Şifre başarıyla güncellendi.');
       setForm({ currentPassword: '', newPassword: '', confirm: '' });
     } catch (err: any) {
       setError(err.message);
@@ -40,49 +33,26 @@ export default function AccountPage() {
     <div className="max-w-md mx-auto">
       <div className="mb-8">
         <h1 className="font-display text-2xl text-snow font-semibold">Hesap</h1>
-        <p className="font-body text-silver text-sm mt-1">Sifrenizi buradan degistirebilirsiniz.</p>
+        <p className="font-body text-silver text-sm mt-1">Şifrenizi buradan değiştirebilirsiniz.</p>
       </div>
-
       <div className="bg-surface border border-border rounded-2xl p-6">
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div>
-            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Mevcut Sifre</label>
-            <input
-              type="password"
-              required
-              value={form.currentPassword}
-              onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-              className={inputCls}
-            />
+            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Mevcut Şifre</label>
+            <input type="password" required value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} className={inputCls} />
           </div>
           <div>
-            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Yeni Sifre</label>
-            <input
-              type="password"
-              required
-              value={form.newPassword}
-              onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-              className={inputCls}
-            />
+            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Yeni Şifre</label>
+            <input type="password" required value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} className={inputCls} />
           </div>
           <div>
-            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Yeni Sifre (Tekrar)</label>
-            <input
-              type="password"
-              required
-              value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              className={inputCls}
-            />
+            <label className="font-body text-xs text-silver uppercase tracking-widest block mb-1.5">Yeni Şifre (Tekrar)</label>
+            <input type="password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} className={inputCls} />
           </div>
           {error && <p className="font-body text-red-400 text-sm">{error}</p>}
           {success && <p className="font-body text-emerald-400 text-sm">{success}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="py-3 bg-gold hover:bg-gold-dim disabled:opacity-50 text-void font-display font-semibold rounded-lg transition-colors"
-          >
-            {loading ? 'Guncelleniyor...' : 'Sifreyi Guncelle'}
+          <button type="submit" disabled={loading} className="py-3 bg-gold hover:bg-gold-dim disabled:opacity-50 text-void font-display font-semibold rounded-lg transition-colors">
+            {loading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
           </button>
         </form>
       </div>
