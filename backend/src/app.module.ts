@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AdminModule } from './admin/admin.module';
+import { ImportModule } from './import/import.module';
 import { AnnouncementModule } from './announcement/announcement.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
@@ -25,6 +26,7 @@ import { UploadModule } from './upload/upload.module';
     AnnouncementModule,
     MenuModule,
     UploadModule,
+    ImportModule,
     CleanupModule,
   ],
 })

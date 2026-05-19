@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api';
 import ConfirmModal from '../components/ConfirmModal';
 import ImageUpload from '../components/ImageUpload';
+import ImportMenuModal from '../components/ImportMenuModal';
 
 type Category = {
   id: string;
@@ -23,6 +24,7 @@ export default function CategoriesPage() {
   const [dragging, setDragging] = useState<string | null>(null);
   const dragOver = useRef<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
 
   const load = () => api.get('/categories').then(setCategories).catch(() => {});
 
@@ -84,15 +86,26 @@ export default function CategoriesPage() {
             {categories.length} kategori · sıralamak için sürükle
           </p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2 bg-gold hover:bg-gold-dim text-void font-display font-semibold text-sm rounded-lg transition-colors"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Yeni Kategori
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-elevated hover:bg-border border border-border text-silver hover:text-snow font-body text-sm rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            Fotoğraftan İçe Aktar
+          </button>
+          <button
+            onClick={openNew}
+            className="flex items-center gap-2 px-4 py-2 bg-gold hover:bg-gold-dim text-void font-display font-semibold text-sm rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Yeni Kategori
+          </button>
+        </div>
       </div>
 
       {/* Form modal */}
@@ -255,6 +268,13 @@ export default function CategoriesPage() {
           confirmLabel="Evet, sil"
           onConfirm={() => { remove(confirmId); setConfirmId(null); }}
           onCancel={() => setConfirmId(null)}
+        />
+      )}
+
+      {showImport && (
+        <ImportMenuModal
+          onClose={() => setShowImport(false)}
+          onImported={load}
         />
       )}
     </div>

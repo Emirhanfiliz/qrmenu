@@ -50,6 +50,21 @@ export async function uploadImage(file: File): Promise<string> {
   return data.url as string;
 }
 
+export async function analyzeMenuPhoto(file: File): Promise<{
+  categories: { name: string; products: { name: string; description: string; price: number }[] }[];
+}> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${BASE}/import/menu-photo`, {
+    method: 'POST',
+    headers: token() ? { Authorization: `Bearer ${token()}` } : {},
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Analiz başarısız.');
+  return data;
+}
+
 export const api = {
   get: (path: string) => req('GET', path),
   post: (path: string, body: unknown) => req('POST', path, body),
