@@ -2,7 +2,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { RestaurantStatus, SubscriptionType } from '@prisma/client';
+import { AdminAction, RestaurantStatus, SubscriptionType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -17,10 +17,13 @@ export class AdminService {
     });
   }
 
-  async approveAndSubscribe(
-    restaurantId: string,
-    type: SubscriptionType,
-  ) {
+  private log(adminId: string, restaurantId: string, restaurantName: string, restaurantSlug: string, action: AdminAction) {
+    return this.prisma.adminLog.create({
+      data: { adminId, restaurantId, restaurantName, restaurantSlug, action },
+    });
+  }
+
+  async approveAndSubscribe(restaurantId: string, type: SubscriptionType, adminId: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
       include: { subscription: true },
@@ -31,6 +34,8 @@ export class AdminService {
     const startsAt = new Date();
     const endsAt = new Date();
     endsAt.setDate(endsAt.getDate() + days);
+
+    const action = type === SubscriptionType.TRIAL ? AdminAction.APPROVE_TRIAL : AdminAction.APPROVE_ANNUAL;
 
     await this.prisma.$transaction([
       this.prisma.restaurant.update({
@@ -38,19 +43,17 @@ export class AdminService {
         data: { status: RestaurantStatus.ACTIVE },
       }),
       restaurant.subscription
-        ? this.prisma.subscription.update({
-            where: { restaurantId },
-            data: { type, startsAt, endsAt },
-          })
-        : this.prisma.subscription.create({
-            data: { restaurantId, type, startsAt, endsAt },
-          }),
+        ? this.prisma.subscription.update({ where: { restaurantId }, data: { type, startsAt, endsAt } })
+        : this.prisma.subscription.create({ data: { restaurantId, type, startsAt, endsAt } }),
+      this.prisma.adminLog.create({
+        data: { adminId, restaurantId, restaurantName: restaurant.name, restaurantSlug: restaurant.slug, action },
+      }),
     ]);
 
     return { message: 'Restoran onaylandı ve abonelik atandı.' };
   }
 
-  async renewSubscription(restaurantId: string, type: SubscriptionType) {
+  async renewSubscription(restaurantId: string, type: SubscriptionType, adminId: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
       include: { subscription: true },
@@ -62,24 +65,21 @@ export class AdminService {
     const endsAt = new Date();
     endsAt.setDate(endsAt.getDate() + days);
 
+    const action = type === SubscriptionType.TRIAL ? AdminAction.RENEW_TRIAL : AdminAction.RENEW_ANNUAL;
+
     if (restaurant.subscription) {
-      await this.prisma.subscription.update({
-        where: { restaurantId },
-        data: { type, startsAt, endsAt },
-      });
+      await this.prisma.subscription.update({ where: { restaurantId }, data: { type, startsAt, endsAt } });
     } else {
-      await this.prisma.subscription.create({
-        data: { restaurantId, type, startsAt, endsAt },
-      });
+      await this.prisma.subscription.create({ data: { restaurantId, type, startsAt, endsAt } });
     }
+
+    await this.log(adminId, restaurantId, restaurant.name, restaurant.slug, action);
 
     return { message: 'Abonelik yenilendi.' };
   }
 
-  async suspendRestaurant(restaurantId: string) {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: restaurantId },
-    });
+  async suspendRestaurant(restaurantId: string, adminId: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
     if (!restaurant) throw new NotFoundException('Restoran bulunamadı.');
 
     await this.prisma.restaurant.update({
@@ -87,7 +87,23 @@ export class AdminService {
       data: { status: RestaurantStatus.SUSPENDED },
     });
 
+    await this.log(adminId, restaurantId, restaurant.name, restaurant.slug, AdminAction.SUSPEND);
+
     return { message: 'Restoran askıya alındı.' };
+  }
+
+  async getLogs(page = 1) {
+    const pageSize = 30;
+    const [logs, total] = await Promise.all([
+      this.prisma.adminLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { admin: { select: { email: true } } },
+      }),
+      this.prisma.adminLog.count(),
+    ]);
+    return { logs, total, page, pageSize };
   }
 
   async getStats() {

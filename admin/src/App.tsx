@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import RestaurantsPage from './pages/RestaurantsPage';
 import DashboardPage from './pages/DashboardPage';
 import RestaurantDetailPage from './pages/RestaurantDetailPage';
+import LogsPage from './pages/LogsPage';
 
 function Nav() {
   const { admin, logout } = useAuth();
@@ -19,6 +20,7 @@ function Nav() {
         <nav className="flex gap-4">
           <NavLink to="/dashboard" className={linkClass}>dashboard</NavLink>
           <NavLink to="/restaurants" className={linkClass}>restaurants</NavLink>
+          <NavLink to="/logs" className={linkClass}>logs</NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-4">
@@ -63,6 +65,7 @@ export default function App() {
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/restaurants" element={<ProtectedRoute><RestaurantsPage /></ProtectedRoute>} />
           <Route path="/restaurants/:id" element={<ProtectedRoute><RestaurantDetailPage /></ProtectedRoute>} />
+          <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>

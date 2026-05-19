@@ -122,10 +122,33 @@ model MenuScan {
 }
 
 model Admin {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
   passwordHash String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
+  logs         AdminLog[]
 
   @@map("admins")
+}
+
+enum AdminAction {
+  APPROVE_TRIAL
+  APPROVE_ANNUAL
+  RENEW_TRIAL
+  RENEW_ANNUAL
+  SUSPEND
+}
+
+model AdminLog {
+  id             String      @id @default(cuid())
+  adminId        String
+  admin          Admin       @relation(fields: [adminId], references: [id])
+  restaurantId   String
+  restaurantName String
+  restaurantSlug String
+  action         AdminAction
+  createdAt      DateTime    @default(now())
+
+  @@index([createdAt])
+  @@map("admin_logs")
 }
