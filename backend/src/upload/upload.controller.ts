@@ -10,6 +10,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
+import sharp = require('sharp');
 import { ActiveRestaurantGuard } from '../auth/guards';
 
 @UseGuards(ActiveRestaurantGuard)
@@ -21,11 +23,10 @@ export class UploadController {
       storage: diskStorage({
         destination: path.join(process.cwd(), 'uploads'),
         filename: (_, file, cb) => {
-          const ext = path.extname(file.originalname).toLowerCase();
-          cb(null, crypto.randomUUID() + ext);
+          cb(null, crypto.randomUUID() + path.extname(file.originalname).toLowerCase());
         },
       }),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+      limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (_, file, cb) => {
         const allowedExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
         const allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -38,9 +39,21 @@ export class UploadController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Dosya bulunamadı.');
+
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    const outName = crypto.randomUUID() + '.webp';
+    const outPath = path.join(uploadsDir, outName);
+
+    await sharp(file.path)
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toFile(outPath);
+
+    fs.unlinkSync(file.path);
+
     const appUrl = process.env.APP_URL || 'http://localhost:3001';
-    return { url: `${appUrl}/uploads/${file.filename}` };
+    return { url: `${appUrl}/uploads/${outName}` };
   }
 }

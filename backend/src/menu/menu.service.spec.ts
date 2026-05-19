@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { HttpException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MenuService } from './menu.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -35,37 +35,40 @@ describe('MenuService', () => {
       workingHours: null,
       wifiInfo: null,
       showWelcome: false,
+      instagramUrl: null,
+      tiktokUrl: null,
+      googleMapsUrl: null,
+      googlePlaceId: null,
       status: 'ACTIVE',
       categories: [],
       announcements: [],
     };
 
-    // AC-1: Non-existent slug throws 404
     it('throws NotFoundException when restaurant does not exist', async () => {
       mockPrisma.restaurant.findUnique.mockResolvedValue(null);
       await expect(service.getMenu('nonexistent')).rejects.toThrow(NotFoundException);
     });
 
-    // AC-2: Expired subscription blocks public access
-    it('throws NotFoundException when subscription is expired', async () => {
+    it('throws 402 HttpException when subscription is expired', async () => {
       mockPrisma.restaurant.findUnique.mockResolvedValue({
         ...baseRestaurant,
-        subscription: { endsAt: new Date('2000-01-01') }, // past date
+        subscription: { endsAt: new Date('2000-01-01') },
       });
-      await expect(service.getMenu('test-kafe')).rejects.toThrow(NotFoundException);
+      await expect(service.getMenu('test-kafe')).rejects.toThrow(HttpException);
+      await expect(service.getMenu('test-kafe')).rejects.toMatchObject(
+        expect.objectContaining({ status: 402 })
+      );
     });
 
-    // AC-3: Missing subscription blocks public access
-    it('throws NotFoundException when restaurant has no subscription', async () => {
+    it('throws 402 HttpException when restaurant has no subscription', async () => {
       mockPrisma.restaurant.findUnique.mockResolvedValue({
         ...baseRestaurant,
         subscription: null,
       });
-      await expect(service.getMenu('test-kafe')).rejects.toThrow(NotFoundException);
+      await expect(service.getMenu('test-kafe')).rejects.toThrow(HttpException);
     });
 
-    // AC-4: Active subscription allows access and records a scan
-    it('returns menu data and records a scan when subscription is active', async () => {
+    it('returns menu data without subscription field when active', async () => {
       const futureDate = new Date();
       futureDate.setFullYear(futureDate.getFullYear() + 1);
 
@@ -73,25 +76,39 @@ describe('MenuService', () => {
         ...baseRestaurant,
         subscription: { endsAt: futureDate },
       });
-      mockPrisma.menuScan.create.mockResolvedValue({});
 
       const result = await service.getMenu('test-kafe');
 
       expect(result.name).toBe('Test Kafe');
       expect(result).not.toHaveProperty('subscription');
+    });
+
+    it('treats subscription expiring in the past as expired', async () => {
+      const justNow = new Date(Date.now() - 1);
+      mockPrisma.restaurant.findUnique.mockResolvedValue({
+        ...baseRestaurant,
+        subscription: { endsAt: justNow },
+      });
+      await expect(service.getMenu('test-kafe')).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('recordScan', () => {
+    it('creates scan record when restaurant exists', async () => {
+      mockPrisma.restaurant.findUnique.mockResolvedValue({ id: 'r1' });
+      mockPrisma.menuScan.create.mockResolvedValue({});
+
+      await service.recordScan('test-kafe');
+
       expect(mockPrisma.menuScan.create).toHaveBeenCalledWith({
         data: { restaurantId: 'r1' },
       });
     });
 
-    // AC-5: Subscription expiring exactly now is treated as expired
-    it('treats subscription expiring at exactly current time as expired', async () => {
-      const justNow = new Date(Date.now() - 1); // 1ms in the past
-      mockPrisma.restaurant.findUnique.mockResolvedValue({
-        ...baseRestaurant,
-        subscription: { endsAt: justNow },
-      });
-      await expect(service.getMenu('test-kafe')).rejects.toThrow(NotFoundException);
+    it('does nothing when restaurant not found', async () => {
+      mockPrisma.restaurant.findUnique.mockResolvedValue(null);
+      await service.recordScan('nonexistent');
+      expect(mockPrisma.menuScan.create).not.toHaveBeenCalled();
     });
   });
 });
