@@ -1,10 +1,13 @@
 import 'dotenv/config';
+import './instrument'; // Sentry — en üstte olmalı
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as Sentry from '@sentry/node';
 import helmet from 'helmet';
 import * as path from 'path';
 import { AppModule } from './app.module';
+import { initSentry } from './instrument';
 
 function validateEnv() {
   const required = ['DATABASE_URL', 'JWT_SECRET'];
@@ -21,6 +24,7 @@ function validateEnv() {
 
 async function bootstrap() {
   validateEnv();
+  initSentry();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(helmet());
