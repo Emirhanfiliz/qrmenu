@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../context/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
 
 type Restaurant = {
@@ -32,8 +31,6 @@ function daysLeft(sub: Restaurant['subscription']): number {
 }
 
 export default function RestaurantsPage() {
-  const { admin, logout } = useAuth();
-  const navigate = useNavigate();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filter, setFilter] = useState<typeof STATUS_FILTER[number]>('ALL');
   const [acting, setActing] = useState<string | null>(null);
@@ -46,8 +43,6 @@ export default function RestaurantsPage() {
   };
 
   useEffect(() => { load(filter); }, [filter]);
-
-  const handleLogout = () => { logout(); navigate('/login'); };
 
   const approve = async (id: string, type: 'TRIAL' | 'ANNUAL') => {
     setActing(id);
@@ -88,34 +83,18 @@ export default function RestaurantsPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-ink">
-      {/* Header */}
-      <header className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <p className="font-mono text-emerge text-sm">qrmenu/admin</p>
-          {pendingCount > 0 && (
-            <span className="px-2 py-0.5 bg-warn/10 text-warn text-xs font-mono rounded">
-              {pendingCount} bekliyor
-            </span>
-          )}
-          {expiredCount > 0 && (
-            <span className="px-2 py-0.5 bg-danger/10 text-danger text-xs font-mono rounded">
-              {expiredCount} abonelik sona erdi
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          <p className="font-mono text-dim text-xs">{admin?.email}</p>
-          <button onClick={handleLogout} className="font-mono text-xs text-dim hover:text-bright transition-colors">
-            logout
-          </button>
-        </div>
-      </header>
-
-      <div className="px-6 py-8 max-w-6xl mx-auto">
+    <div className="px-6 py-8 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="font-mono text-bright text-lg">restaurants</h1>
-          <p className="font-mono text-dim text-xs">{restaurants.length} kayit</p>
+          <div className="flex items-center gap-3">
+            <h1 className="font-mono text-bright text-lg">restaurants</h1>
+            {pendingCount > 0 && (
+              <span className="px-2 py-0.5 bg-warn/10 text-warn text-xs font-mono rounded">{pendingCount} bekliyor</span>
+            )}
+            {expiredCount > 0 && (
+              <span className="px-2 py-0.5 bg-danger/10 text-danger text-xs font-mono rounded">{expiredCount} sona erdi</span>
+            )}
+          </div>
+          <p className="font-mono text-dim text-xs">{restaurants.length} kayıt</p>
         </div>
 
         {/* Filter tabs */}
@@ -160,10 +139,10 @@ export default function RestaurantsPage() {
                   }`}
                 >
                   {/* Name */}
-                  <div className="col-span-3 min-w-0">
-                    <p className="font-mono text-bright text-sm truncate">{r.name}</p>
+                  <Link to={`/restaurants/${r.id}`} className="col-span-3 min-w-0 group">
+                    <p className="font-mono text-bright text-sm truncate group-hover:text-emerge transition-colors">{r.name}</p>
                     <p className="font-mono text-dim text-xs mt-0.5 truncate">/{r.slug}</p>
-                  </div>
+                  </Link>
 
                   {/* Email */}
                   <div className="col-span-2 min-w-0">
@@ -268,7 +247,6 @@ export default function RestaurantsPage() {
             })}
           </div>
         )}
-      </div>
 
       {confirmSuspend && (
         <ConfirmModal

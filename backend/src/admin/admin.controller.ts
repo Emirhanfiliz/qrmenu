@@ -32,4 +32,14 @@ export class AdminController {
   suspend(@Param('id') id: string) {
     return this.adminService.suspendRestaurant(id);
   }
+
+  @Get('stats')
+  getStats() {
+    return this.adminService.getStats();
+  }
+
+  @Get('restaurants/:id')
+  getRestaurantDetail(@Param('id') id: string) {
+    return this.adminService.getRestaurantDetail(id);
+  }
 }
