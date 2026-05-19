@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Layout from './components/Layout';
@@ -30,6 +31,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <TooltipProvider>
         <BrowserRouter>
@@ -68,6 +70,7 @@ export default function App() {
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -78,4 +81,28 @@ function NotFound() {
       <p className="font-body text-silver text-sm">Bu sayfa bulunamadı.</p>
     </div>
   );
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6">
+          <p className="font-display text-2xl text-gold font-semibold">Bir hata oluştu</p>
+          <p className="font-body text-silver text-sm text-center max-w-sm">
+            Sayfa yüklenirken beklenmedik bir hata meydana geldi. Lütfen sayfayı yenileyin.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-gold text-void rounded-lg font-body font-semibold text-sm hover:bg-gold-dim transition-colors"
+          >
+            Sayfayı Yenile
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }

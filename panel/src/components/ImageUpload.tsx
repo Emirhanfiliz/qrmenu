@@ -39,6 +39,10 @@ export default function ImageUpload({ value, onChange, label = 'Fotograf' }: Pro
   const handleCrop = (blob: Blob) => {
     setCropSrc(null);
     setPendingFile(null);
+    if (blob.size > 5 * 1024 * 1024) {
+      setError('Resim 5MB sınırını aşıyor. Daha küçük bir resim seçin.');
+      return;
+    }
     doUpload(blob);
   };
 

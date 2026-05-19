@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { IsEmail, IsString, Length, MinLength } from 'class-validator';
+import { IsEmail, IsString, Length, Matches, MinLength } from 'class-validator';
 import { RestaurantGuard } from './guards';
 import { AuthService } from './auth.service';
 import type { Request } from 'express';
@@ -8,7 +8,12 @@ import type { Request } from 'express';
 class RegisterDto {
   @IsString() name: string;
   @IsEmail() email: string;
-  @IsString() @MinLength(6) password: string;
+  @IsString()
+  @MinLength(8)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
+    message: 'Şifre en az 8 karakter, bir büyük harf, bir küçük harf ve bir rakam içermelidir.',
+  })
+  password: string;
 }
 
 class LoginDto {

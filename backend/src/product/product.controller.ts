@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsPositive, IsString, Min } from 'class-validator';
 import { ActiveRestaurantGuard } from '../auth/guards';
 import { ProductService } from './product.service';
 
@@ -8,8 +8,8 @@ class CreateProductDto {
   @IsString() categoryId: string;
   @IsString() name: string;
   @IsOptional() @IsString() description?: string;
-  @IsNumber() @Min(0) @Type(() => Number) price: number;
-  @IsOptional() @IsNumber() @Min(0) @Type(() => Number) discountedPrice?: number;
+  @IsNumber() @IsPositive() @Type(() => Number) price: number;
+  @IsOptional() @IsNumber() @IsPositive() @Type(() => Number) discountedPrice?: number;
   @IsOptional() @IsInt() @Min(0) @Type(() => Number) preparationTime?: number;
   @IsOptional() @IsInt() @Min(0) @Type(() => Number) calories?: number;
   @IsOptional() @IsString() allergens?: string;
@@ -21,8 +21,8 @@ class UpdateProductDto {
   @IsOptional() @IsString() categoryId?: string;
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() description?: string;
-  @IsOptional() @IsNumber() @Min(0) @Type(() => Number) price?: number;
-  @IsOptional() @IsNumber() @Min(0) @Type(() => Number) discountedPrice?: number;
+  @IsOptional() @IsNumber() @IsPositive() @Type(() => Number) price?: number;
+  @IsOptional() @IsNumber() @IsPositive() @Type(() => Number) discountedPrice?: number;
   @IsOptional() @IsInt() @Min(0) @Type(() => Number) preparationTime?: number;
   @IsOptional() @IsInt() @Min(0) @Type(() => Number) calories?: number;
   @IsOptional() @IsString() allergens?: string;

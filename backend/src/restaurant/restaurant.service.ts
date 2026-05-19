@@ -102,14 +102,19 @@ export class RestaurantService {
   async searchGooglePlace(query: string) {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
     if (!apiKey) throw new Error('Google Places API key not configured.');
-    const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(query)}&inputtype=textquery&fields=place_id,name,formatted_address&key=${apiKey}`;
-    const res = await fetch(url);
-    const data = await res.json() as { candidates: { place_id: string; name: string; formatted_address: string }[] };
-    return data.candidates.slice(0, 3).map((c) => ({
-      placeId: c.place_id,
-      name: c.name,
-      address: c.formatted_address,
-    }));
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(query)}&inputtype=textquery&fields=place_id,name,formatted_address&key=${apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Google API ${res.status}`);
+      const data = await res.json() as { candidates: { place_id: string; name: string; formatted_address: string }[] };
+      return (data.candidates ?? []).slice(0, 3).map((c) => ({
+        placeId: c.place_id,
+        name: c.name,
+        address: c.formatted_address,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   async getStats(restaurantId: string) {

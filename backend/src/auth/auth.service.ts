@@ -36,16 +36,28 @@ export class AuthService {
     const code = generateCode();
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
-    await this.prisma.restaurant.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        passwordHash,
-        slug: uniqueSlug,
-        emailVerificationToken: code,
-        emailVerificationExpires: expires,
-      },
-    });
+    try {
+      await this.prisma.restaurant.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          passwordHash,
+          slug: uniqueSlug,
+          emailVerificationToken: code,
+          emailVerificationExpires: expires,
+        },
+      });
+    } catch (e: any) {
+      // P2002 = unique constraint violation (slug race condition)
+      if (e?.code === 'P2002' && e?.meta?.target?.includes('slug')) {
+        const retrySlug = `${uniqueSlug}-${Math.floor(Math.random() * 9000 + 1000)}`;
+        await this.prisma.restaurant.create({
+          data: { name: dto.name, email: dto.email, passwordHash, slug: retrySlug, emailVerificationToken: code, emailVerificationExpires: expires },
+        });
+      } else {
+        throw e;
+      }
+    }
 
     await this.email.sendVerificationEmail(dto.email, code);
 

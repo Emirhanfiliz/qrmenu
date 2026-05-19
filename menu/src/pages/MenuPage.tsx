@@ -34,7 +34,7 @@ function inject(iframeRef: React.RefObject<HTMLIFrameElement | null>, data: Menu
       phone: data.phone ?? '',
       wifi: data.wifiInfo ?? '',
     },
-    announcements: data.announcements.map((a) => ({ title: a.title, body: a.body })),
+    announcements: data.announcements.map((a) => ({ title: a.title, body: a.body, image: a.imageUrl ?? '' })),
     menu: data.categories.map((cat) => ({
       catId: cat.id,
       cat: cat.name,

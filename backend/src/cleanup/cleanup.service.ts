@@ -21,4 +21,22 @@ export class CleanupService {
       this.logger.log(`90 günden eski ${count} tarama kaydı silindi.`);
     }
   }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async clearExpiredVerificationTokens() {
+    const { count } = await this.prisma.restaurant.updateMany({
+      where: {
+        emailVerificationExpires: { lt: new Date() },
+        emailVerifiedAt: null,
+      },
+      data: {
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
+
+    if (count > 0) {
+      this.logger.log(`${count} süresi dolmuş doğrulama kodu temizlendi.`);
+    }
+  }
 }

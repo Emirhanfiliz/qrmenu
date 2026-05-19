@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emirh\\\\qrmenu\" -Depth 2)",
+      "Bash(Select-Object FullName)",
+      "Bash(npx prisma *)",
+      "Bash(cat .env)",
+      "Bash(cat prisma/.env)",
+      "Bash(cat prisma/prisma.config.ts)",
+      "Bash(cat prisma.config.ts)",
+      "Bash(docker exec *)",
+      "Bash(docker run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: image crop, product details, announcement images, toast system, menu fixes *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const bcrypt = require\\('bcrypt'\\); bcrypt.hash\\('admin123', 10\\).then\\(h => console.log\\(h\\)\\);\")",
+      "Bash(npx tsc *)",
+      "Bash(git commit -m ' *)",
+      "Bash(echo \"Backend PID: $!\")",
+      "Bash(echo \"Panel PID: $!\")",
+      "Bash(echo \"Menu PID: $!\")",
+      "Bash(echo \"Admin PID: $!\")",
+      "Bash(pg_isready -h localhost -p 5433)",
+      "Skill(frontend-design:frontend-design)",
+      "Bash(taskkill /PID 53300 /F)",
+      "Bash(xargs grep -l \"stats\")",
+      "Bash(xargs grep -l \"totalScans\\\\|dailyScans\\\\|recentScans\")",
+      "PowerShell(Get-Process *)",
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emirh\\\\OneDrive\\\\Desktop\\\\qr-menu-system\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('scripts',{}\\)\\)\")",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__get_advisors",
+      "mcp__claude_ai_Supabase__list_tables",
+      "Bash(curl -s http://localhost:3001/restaurant/stats -H \"Authorization: Bearer test\")",
+      "Bash(curl -s http://localhost:3000/restaurant/stats -H \"Authorization: Bearer test\")",
+      "Bash(powershell *)",
+      "Bash(npm install *)",
+      "PowerShell(git *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\emirh\\\\qrmenu\\\\backend\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\emirh\\\\qrmenu\\\\backend\\\\prisma\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\emirh\\\\qrmenu\\\\backend\\\\prisma\\\\migrations\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\emirh\\\\qrmenu\\\\backend\\\\prisma\\\\migrations\" -Force | ForEach-Object { $_.Name } | Select-Object -Last 3)",
+      "Bash(npx jest *)"
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "railway"
+  ]
+}
