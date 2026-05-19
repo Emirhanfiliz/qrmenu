@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useNavigate, useMatch } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import EmailVerificationBanner from './EmailVerificationBanner';
 
 const MENU_BASE = import.meta.env.VITE_MENU_BASE || 'http://localhost:5173';
 
@@ -180,6 +181,8 @@ export default function Layout() {
           <span className="block h-px bg-snow w-5" />
         </button>
       </header>
+
+      <EmailVerificationBanner />
 
       {/* ── Body ── */}
       <div className="flex flex-1 overflow-hidden">

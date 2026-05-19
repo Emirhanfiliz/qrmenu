@@ -6,12 +6,18 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from './email.service';
+
+function generateCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private email: EmailService,
   ) {}
 
   async registerRestaurant(dto: { name: string; email: string; password: string }) {
@@ -27,17 +33,80 @@ export class AuthService {
 
     const uniqueSlug = await this.ensureUniqueSlug(slug);
     const passwordHash = await bcrypt.hash(dto.password, 10);
+    const code = generateCode();
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
-    const restaurant = await this.prisma.restaurant.create({
+    await this.prisma.restaurant.create({
       data: {
         name: dto.name,
         email: dto.email,
         passwordHash,
         slug: uniqueSlug,
+        emailVerificationToken: code,
+        emailVerificationExpires: expires,
       },
     });
 
-    return { message: 'Kayıt başarılı. Hesabınız admin onayı bekliyor.' };
+    await this.email.sendVerificationEmail(dto.email, code);
+
+    return { message: 'Kayıt başarılı. Email adresinize doğrulama kodu gönderildi.' };
+  }
+
+  async verifyEmail(restaurantId: string, code: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+    });
+
+    if (!restaurant) throw new BadRequestException('Geçersiz istek.');
+    if (restaurant.emailVerifiedAt) return { message: 'Email zaten doğrulanmış.' };
+
+    if (
+      restaurant.emailVerificationToken !== code ||
+      !restaurant.emailVerificationExpires ||
+      restaurant.emailVerificationExpires < new Date()
+    ) {
+      throw new BadRequestException('Kod hatalı veya süresi dolmuş.');
+    }
+
+    await this.prisma.restaurant.update({
+      where: { id: restaurantId },
+      data: {
+        emailVerifiedAt: new Date(),
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
+
+    return { message: 'Email adresiniz doğrulandı.' };
+  }
+
+  async resendVerification(restaurantId: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+    });
+
+    if (!restaurant) throw new BadRequestException('Geçersiz istek.');
+    if (restaurant.emailVerifiedAt) throw new BadRequestException('Email zaten doğrulanmış.');
+
+    // Önceki kod gönderilmişse 1 dk bekleme zorunluluğu
+    if (
+      restaurant.emailVerificationExpires &&
+      restaurant.emailVerificationExpires.getTime() > Date.now() + 59 * 60 * 1000
+    ) {
+      throw new BadRequestException('Çok sık deneme. 1 dakika bekleyin.');
+    }
+
+    const code = generateCode();
+    const expires = new Date(Date.now() + 60 * 60 * 1000);
+
+    await this.prisma.restaurant.update({
+      where: { id: restaurantId },
+      data: { emailVerificationToken: code, emailVerificationExpires: expires },
+    });
+
+    await this.email.sendVerificationEmail(restaurant.email, code);
+
+    return { message: 'Doğrulama kodu tekrar gönderildi.' };
   }
 
   async loginRestaurant(dto: { email: string; password: string }) {
@@ -64,6 +133,7 @@ export class AuthService {
         slug: restaurant.slug,
         email: restaurant.email,
         status: restaurant.status,
+        emailVerifiedAt: restaurant.emailVerifiedAt,
         subscription: restaurant.subscription,
       },
     };

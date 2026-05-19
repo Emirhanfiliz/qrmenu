@@ -8,6 +8,7 @@ type Restaurant = {
   slug: string;
   logoUrl: string | null;
   status: string;
+  emailVerifiedAt: string | null;
   subscription: { type: string; endsAt: string } | null;
 };
 

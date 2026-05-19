@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
+import { EmailService } from './email.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const mockPrisma = {
@@ -16,6 +17,7 @@ const mockPrisma = {
 };
 
 const mockJwt = { sign: jest.fn().mockReturnValue('signed-token') };
+const mockEmail = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -27,6 +29,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: JwtService, useValue: mockJwt },
+        { provide: EmailService, useValue: mockEmail },
       ],
     }).compile();
     service = module.get(AuthService);

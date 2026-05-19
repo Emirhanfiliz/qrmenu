@@ -1,7 +1,9 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, Length, MinLength } from 'class-validator';
+import { RestaurantGuard } from './guards';
 import { AuthService } from './auth.service';
+import type { Request } from 'express';
 
 class RegisterDto {
   @IsString() name: string;
@@ -12,6 +14,10 @@ class RegisterDto {
 class LoginDto {
   @IsEmail() email: string;
   @IsString() password: string;
+}
+
+class VerifyEmailDto {
+  @IsString() @Length(6, 6) token: string;
 }
 
 @UseGuards(ThrottlerGuard)
@@ -37,5 +43,23 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   adminLogin(@Body() dto: LoginDto) {
     return this.auth.loginAdmin(dto);
+  }
+
+  @Post('verify-email')
+  @HttpCode(200)
+  @UseGuards(RestaurantGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  verifyEmail(@Body() dto: VerifyEmailDto, @Req() req: Request) {
+    const user = req.user as { sub: string };
+    return this.auth.verifyEmail(user.sub, dto.token);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(200)
+  @UseGuards(RestaurantGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  resendVerification(@Req() req: Request) {
+    const user = req.user as { sub: string };
+    return this.auth.resendVerification(user.sub);
   }
 }

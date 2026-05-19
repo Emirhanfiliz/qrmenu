@@ -36,9 +36,11 @@ model Restaurant {
   tiktokUrl       String?
   googleMapsUrl   String?
   googlePlaceId   String?
-  status          RestaurantStatus @default(PENDING)
-  emailVerifiedAt DateTime?
-  createdAt       DateTime         @default(now())
+  status                   RestaurantStatus @default(PENDING)
+  emailVerifiedAt          DateTime?
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  createdAt                DateTime         @default(now())
 
   subscription  Subscription?
   categories    Category[]
